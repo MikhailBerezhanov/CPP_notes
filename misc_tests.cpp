@@ -1,12 +1,14 @@
 
 #include <iostream>
 #include <string>
-
+#include <cctype>
 
 int const_init()
 {	
 	return -1;
 }
+
+void chapter3 (void);
 
 int a;	// в глобальной области видимости объект встроенного типа инициализируется 0, но не в локальной
 //const int c ;	// ОШИБКА: Необходима инициализация константы
@@ -14,6 +16,7 @@ extern const int c = 1; // для совместного использован�
 
 int main(int argc, char* argv[]) 
 { 
+
 	unsigned u = 10 , u2 = 42 ;
 	std::cout << u2 - u << std::endl;	// 32
 	std::cout << u - u2 << std::endl;	// 32 mod 4 294 967 296 = 4 294 967 264
@@ -112,5 +115,36 @@ int main(int argc, char* argv[])
 	// и может привести к нежелательному включению пространства имен
 	cout << "No std needed, Hooray!" << endl;
 
+
+	chapter3();
+
+
+
 	return 0;
+}
+
+
+void chapter3 (void)
+{
+	std::string str;
+
+	if(std::cin >> str)
+	{
+		decltype(str.size()) size = 0;	// имеет тип  std::string::size_type
+		size = str.size();
+
+		for(auto c : str) {
+			std::cout << ' ' << c << std::endl; 
+			c = 'a';	// изменяет значение управляющей переменной, но не строки. для изменения
+						// элемента строки нужно использовать ссылку &c в for
+		}
+
+		for(char &c : str) c = toupper(c);
+
+		std::cout << "string '" << str << "' size:" << size << std::endl;
+	} 
+
+	const std::string s;
+	for(auto &c : s){ //c = 0;	ОШИБКА: нельзя изменять строку (auto - const char)
+	}
 }
