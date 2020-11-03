@@ -1,10 +1,11 @@
 
 #include <iostream>
 
-int const_init()
-{	
-	return -1;
-}
+// Константные выражения constexpr: возвращаемый тип и тип каждого параметра должны быть литералами 
+// и return может быть только один
+/*constexpr*/ int const_init() { return 10; }
+
+constexpr size_t scale(size_t cnt) { return 50 * cnt;}	// константное выражение, если cnt - константное выражение
 
 void chapter3 (void);
 void chapter4 (void);
@@ -122,13 +123,15 @@ int main(int argc, char* argv[])
 	cout << "No std needed, Hooray!" << endl;
 
 
-	chapter3();
+	//chapter3();
 
-	chapter4();
+	//chapter4();
 
-	chapter5();
+	//chapter5();
 
-	chapter6();
+	//chapter6();
+
+	chapter7();
 
 	return 0;
 }
@@ -476,9 +479,26 @@ void chapter6 (void)
 	f(42);			// (int)
 	f(42, 0);		// (int, int)
 	f(2.56, 3.14);	// (double, double)
-
-
 }
 
 
+
+
+
+
+#include "Sales_data.h"
+
+
+struct test_s
+{
+	int a = 2;
+	int b = 5;
+
+	int summ() { return (a+b); }
+}test;
+
+void chapter7 (void)
+{
+	std::cout << test.summ() << std::endl;
+}
 
