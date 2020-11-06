@@ -1,7 +1,7 @@
 #include "Sales_data.h"
 
 
-
+int Sales_data::st_member = 1;	// Инициализация статического члена класса
 
 Sales_data& Sales_data::combine(const Sales_data& rhs)
 {
@@ -58,4 +58,20 @@ std::istream& read(std::istream& is, Sales_data& item)
 	item.revenue = price * item.units_sold;
 
 	return is;
+}
+
+
+
+
+// Exercise
+// Класс сначала ищет определения типов внутри своего тела, затем в глобальной области, однако тип 
+// возвращаемого значения указывается раньше чем имя и принадлежность функции. Поэтому первый Type -
+// из глобальной области (string), а второй и все остальные переменные из области видимости класса.
+// Для использования типов, поределенный внутри класса или самого класса в качестве возвращаемого значения
+// при определении функции вне класса следует использовать Exercise::
+
+/* Type */Exercise::Type Exercise::setVal(Type parm)
+{
+	val = parm + initVal();
+	return val;	// cast int to string
 }

@@ -500,5 +500,12 @@ struct test_s
 void chapter7 (void)
 {
 	std::cout << test.summ() << std::endl;
+
+
+	Sales_data s;
+	std::string str;
+
+	// Требуется явное преобразование т.к. конструтор(string) explicit
+	s.combine(static_cast<Sales_data>(str));	// ПРИМ: создается временный объект Sales_data из строки
 }
 
