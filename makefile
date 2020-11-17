@@ -16,6 +16,14 @@ INC=-I./
 
 SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)Sales_data.cpp \
+			$(SRC)chapter3.cpp \
+			$(SRC)chapter4.cpp \
+			$(SRC)chapter5.cpp \
+			$(SRC)chapter6.cpp \
+			$(SRC)chapter7.cpp \
+			$(SRC)chapter8.cpp \
+			$(SRC)chapter9.cpp \
+			$(SRC)chapter10.cpp \
 		  
 LLIBS=
 
