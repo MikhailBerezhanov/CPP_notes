@@ -60,6 +60,10 @@ std::istream& read(std::istream& is, Sales_data& item)
 	return is;
 }
 
+bool compare_isbn(const Sales_data& o1, const Sales_data& o2) 
+{ 
+	return o1.isbn() < o2.isbn(); 
+}
 
 
 

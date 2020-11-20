@@ -24,6 +24,9 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)chapter8.cpp \
 			$(SRC)chapter9.cpp \
 			$(SRC)chapter10.cpp \
+			$(SRC)chapter11.cpp \
+			$(SRC)Str_blob.cpp \
+			$(SRC)chapter12.cpp \
 		  
 LLIBS=
 
@@ -38,7 +41,7 @@ all: clean
 	$(LLIBS) 
 
 debug: clean
-	@LC_ALL=C $(CC) $(CFLAGS) -O3 -g $(DEFINES) \
+	@LC_ALL=C $(CCPP) $(CFLAGS) -O3 -g $(DEFINES) $(MY_DEFINES) \
 	$(SRC_FILES) \
 	-o $(EXECNAME) \
 	$(INC) \
