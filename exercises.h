@@ -13,5 +13,11 @@ void chapter10 (void);
 void chapter11 (void);
 void chapter12 (void);
 void chapter13 (void);
+void chapter14 (void);
+void chapter15 (void);
+void chapter16 (void);
+void chapter17 (void);
+void chapter18 (void);
+void chapter19 (void);
 
 #endif // _EXERCISES_H

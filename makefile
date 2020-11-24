@@ -28,6 +28,7 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)Str_blob.cpp \
 			$(SRC)Text_query.cpp \
 			$(SRC)chapter12.cpp \
+			$(SRC)Has_ptr.cpp \
 			$(SRC)chapter13.cpp \
 		  
 LLIBS=
