@@ -16,6 +16,7 @@
 #include <new>					// bad_alloc, nothrow
 
 #include "Str_blob.h"
+#include "Text_query.h"
 #include "exercises.h"
 
 static std::shared_ptr<int> example()
@@ -193,15 +194,26 @@ void chapter12 (void)
 
 	std::unique_ptr<char[]> cp = my_concat("Hello ", "world!");
 	for(int i = 0; cp[i]; ++i) std::cout << cp[i];
+	std::cout << std::endl;
 
 
 	std::allocator<std::string> alloc;	// объект, способный резервировать строки (ПАМЯТЬ НЕ ЗАПОЛНЕНА)
 	auto a = alloc.allocate(10);	// резервирует 10 строк, но не инициализирует их
-	for(int i = 0; i != 10; ++i) alloc.construct(a++, "test");	// передает аргументы консрутору объекта
+	for(int i = 0; i != 10; ++i) alloc.construct(a++, "test");	// передает аргументы конструктору объекта
 	// ПРИМ: перед deallocateстоит вызывать destroy для всех объектов, созданных в области памяти
-	for(int i = 0; i != 10; ++i) alloc.destroy(a++);	// вызывает деструктор для объекта.
+	for(int i = 0; i != 10; ++i) alloc.destroy(--a);	// вызывает деструктор для объекта. (a - указывает на элемент после последнего заполненного)
 	alloc.deallocate(a, 10);
 	// ПРИМ: чтобы использовать память, возвращенную allocate в ней следует предварительно создать объект
 
+
+	Text_query tq("trans.txt");
+	tq.show_word_map(std::cout) << std::endl;
+	tq.find_word("where2").print(std::cout) << std::endl;
+
+
+	std::ifstream in_file("trans.txt");
+	Text_query_heap tqh(in_file);
+	auto res = tqh.query("where");
+	print(std::cout, res);
 }
 

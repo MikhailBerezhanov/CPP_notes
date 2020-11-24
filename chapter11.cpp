@@ -8,7 +8,7 @@
 #include <vector>
 #include <exception>
 #include <list>
-#include <algorithm>			// sort, unique, partition
+#include <algorithm>			// sort, unique, partition, for_each
 #include <map>
 #include <set>
 #include <utility>				// pair
