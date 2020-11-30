@@ -18,6 +18,8 @@
 #include "Str_blob.h"
 #include "Text_query.h"
 #include "Has_ptr.h"
+#include "Message.h"
+#include "StrVec.h"
 #include "exercises.h"
 
 
@@ -59,7 +61,6 @@ static void f(numbered& s)
 
 void chapter13(void)
 {
-
 	// прямая инициализация
 	Has_ptr hp1("qweqeqwewqe qsadfdsagdgsert467658679uhkhkyiuorlojcjbncc11111111111111111111111111111111111111111123333333333333333333333333333333333333333333333333333333333333333333333333333__0");
 #if 0
@@ -88,6 +89,34 @@ void chapter13(void)
 	std::cout << "a: " << a.mysn << " b: " << b.mysn << " c: " << c.mysn << std::endl;
 	f(a); f(b); f(c);
 
+	hp1 = hp1;	// оператор присвоения копирования должен корректно работать при присвоении самого себя
+
+
+	Has_ptr_ x;
+	Has_ptr_ y("bb");
+
+	x = y;	// счетчик ссылок у 'x' обнуляется, а у 'y' становится 2. Указатель x.ps равен указателю y.ps
+
+
+	Has_ptr hp2("hello");
+
+	swap(hp1, hp2);
+
+	hp1.show_ps();
+	hp2.show_ps();
+
+	std::vector<Has_ptr> hp_vec { {"q", 1}, {"w", 2}, {"e", 3}, {"r", 4}, {"t", 5}, {"y", 6} }; 
+
+	//std::sort(hp_vec.begin(), hp_vec.end());
+
+
+	StrVec svec = {"1", "2", "3"};
+	svec.push_back("hello");
+
+	int tmp = 10;
+	int& r = tmp;
+
+	std::cout << "tmp addr: " << &tmp << ", &tmp addr: " << &r << std::endl;
 }
 
 
