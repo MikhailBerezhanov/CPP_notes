@@ -32,6 +32,8 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)Message.cpp \
 			$(SRC)StrVec.cpp \
 			$(SRC)chapter13.cpp \
+			$(SRC)MyString.cpp \
+			$(SRC)chapter14.cpp \
 		  
 LLIBS=
 

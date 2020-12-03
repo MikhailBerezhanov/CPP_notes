@@ -11,7 +11,7 @@
 #include <algorithm>			// sort, unique, partition
 #include <map>
 #include <set>
-#include <utility>				// pair
+#include <utility>				// pair, move
 #include <memory>				// shared_ptr, unique_ptr, weak_ptr, allocator
 #include <new>					// bad_alloc, nothrow
 
@@ -105,7 +105,7 @@ void chapter13(void)
 	hp1.show_ps();
 	hp2.show_ps();
 
-	std::vector<Has_ptr> hp_vec { {"q", 1}, {"w", 2}, {"e", 3}, {"r", 4}, {"t", 5}, {"y", 6} }; 
+	//std::vector<Has_ptr> hp_vec { {"q", 1}, {"w", 2}, {"e", 3}, {"r", 4}, {"t", 5}, {"y", 6} }; 
 
 	//std::sort(hp_vec.begin(), hp_vec.end());
 
@@ -117,6 +117,51 @@ void chapter13(void)
 	int& r = tmp;
 
 	std::cout << "tmp addr: " << &tmp << ", &tmp addr: " << &r << std::endl;
+
+
+
+
+	// Ссылки на r-значение (можно связать только с тем объектом, который будет удален)
+
+	// ПРИМ: l-value выражения - 
+	// 1. ф-ии, возвращающие l-value ссылки
+	// 2. присвоение
+	// 3. индексирование
+	// 4. обращение к значению
+	// 5. префиксные операторы инкремента и декремента
+	// 6. переменные
+
+	// r-value выражения:
+	// 1. ф-ии, возвращающие не ссылочный тип
+	// 2. арифметические, реляционные, побитовые выражения
+	// 3. постфиксные операторы инкремента и декремента
+	// 4. конструкторы
+
+	int i = 43;					// i - l-value
+	int &ri = i;				// OK
+	//int &&rr = i;				// ОШИБКА: i - это lvalue, нельзя связать ссылку на r-value c l-value
+	//int &ri2 = i * 42;		// ОШИБКА: i * 42 - временное значение r-value
+	const int& ri3 = i * 42; 	// ОК константная ссылка допускает присвоение к r-value
+	int &&rr2 = i * 42; 		// ОК i * 42 - временное значение r-value
+	//int &&rr3 = rr2;			// ОШИБКА: rr2 - как переменная является l-value
+	int &&rr3 = std::move(rr2);	// ОК - move() явно приводит l-value к r-value
+	// ПРИМ: приведенный выше вызов move() обещает не использовать rr2 ни для чего кроме присвоения или удаления
+	// после перемещения нельзя сделать никаких предположений о значении уже перемещенного объекта
+
+	int f();
+	std::vector<int> vi(100);
+	int&& _r1 = f();			// f() - r-value
+	int& _r2 = vi[0];			// vi[0] - l-value
+	int& _r3 = _r1;				// _r1 - l-value
+	int&& _r4 = vi[0] * f();	// r-value
+
+	//hp1 = hp2;
+	hp1 = std::move(hp2);
+
+	Foo test;
+	test.sorted();
+
+	Foo&& u = Foo();			// конструкторы - r-value
 }
 
 

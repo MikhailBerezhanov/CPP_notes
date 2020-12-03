@@ -22,11 +22,17 @@ public:
 	// копирование скопирует содержимое и набор указателеей на папку
 	Message(const Message&);
 
+	// Перемещение
+	Message(Message&&);
+
 	// деструктор должен удалять заданное сообщение из папок
 	~Message();
 
 	// присвоение присваивает другому объекту содержимое сообщения и модифицирует набор папок, удаляя левый операнд и добавляя правый
 	Message& operator= (const Message&);
+
+	// присвоение пермещения
+	Message& operator= (Message&&);
 
 	// Добавить \ удалить это сообщение из набор папок
 	void save(Folder&);
@@ -43,6 +49,8 @@ private:
 
 	//
 	void remove_from_folders();
+
+	void move_folders(Message* m);
 };
 
 
@@ -53,6 +61,8 @@ class Folder
 public:
 
 	Folder(){}
+
+	~Folder(){ messages.clear(); }
 
 	void add_msg(Message*);
 	void remove_msg(Message*);

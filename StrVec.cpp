@@ -39,6 +39,7 @@ void StrVec::reallocate()
 
 	auto newdata = alloc.allocate(new_capacity);
 
+#if 0
 	auto dest = newdata;	// указывает на следующую свободную позицию в новом массиве
 	auto elem = elements;	// указывает на следующий эл-т в старом массиве
 
@@ -50,6 +51,15 @@ void StrVec::reallocate()
 		//std::cout << " after moving: " << *(elem-1) << std::endl; // ОШИБКА: после перемещения данные недоступны
 		std::cout << " after moving: " << *(dest-1) << std::endl;
 	}
+#else
+	// ЭКВИВАЛЕНТНО
+	// использование итератора перемещения для копирования диапазона эл-тов в новое пространство
+	// ПРИМ: алгоритм uninitialized_copy() вызывает ф-ию construct для каждого эл-та исходной последовательности
+	// чтобы скопировать э-лты по назначению. Поскольку был передан итератора премещения make_move_iterator(),
+	// оператор обращения к значению возвращает ссылку на r-value. Это означает, что construct() будет использовать
+	// конструктор перемещения для создания эл-тов.
+	auto dest = uninitialized_copy(make_move_iterator(begin()), make_move_iterator(end()), newdata);
+#endif
 
 	std::cout << " calling free from reallocate" << std::endl;
 	free(); // освободить старый массив эл-тов
@@ -92,6 +102,19 @@ StrVec::StrVec(const StrVec& s)
 	cap = ret.second;
 }
 
+// noexcept используется чтобы показать, что использовать конструктор перемещения безопасно и можно 
+// вызывать его вместо конструктора копирования при необходимости реалокации данных вектора 
+// (ведь вектор должен гарантировать сохранность исходных данных)
+StrVec::StrVec(StrVec&& s) noexcept:
+	elements(s.elements), first_free(s.first_free), cap(s.cap)
+{
+	// оставить s в состоянии, при котором вызов деструктора безопасен
+	s.elements = s.first_free = s.cap = nullptr;
+
+	// ПРИМ: после перемещения оригинальный объект (s) должен остаться корректным,  
+	// допускающим удаление объектом, но для пользователей его значение непредсказуемо
+}
+
 StrVec& StrVec::operator= (const StrVec& s)
 {
 	// ПРИМ: в случае присвоения самого себя, копирование эл-тов в новую область перед освобождением
@@ -102,6 +125,23 @@ StrVec& StrVec::operator= (const StrVec& s)
 	elements = ret.first;
 	first_free = ret.second;
 	cap = ret.second;
+
+	return *this;
+}
+
+StrVec& StrVec::operator= (StrVec&& rhs) noexcept
+{
+	// прямая проверка присвоения себя себе
+	if(this != &rhs){
+		// освободить существующие эл-ты
+		free();
+		// переместить rhs
+		elements = rhs.elements;
+		first_free = rhs.first_free;
+		cap = rhs.cap;
+		// оставить s в состоянии, при котором вызов деструктора безопасен
+		rhs.elements = rhs.first_free = rhs.cap = nullptr;
+	}
 
 	return *this;
 }
@@ -120,9 +160,43 @@ void StrVec::push_back(const std::string& s)
 	alloc.construct(first_free++, s);	// создать эл-т в выделенной памяти, сместить указатель за вновь созданный эл-т
 }
 
+void StrVec::push_back(std::string&& s)
+{
+	std::cout << "StrVec::move push_back called" << std::endl;
+
+	check_n_alloc();
+	alloc.construct(first_free++, std::move(s));	// будет использован конструктор перемещения строки
+}
 
 
 
+// ПРИМ: Если у ф-ии-члена есть квалификатор ссылки, то у всех версий этой ф-ии с тем же список параметров
+// должны быть квалификаторы ссылки.
 
+// этот оюъект - r-value, поэтому его можно сортировать на месте
+// Вполне безопасно сортировать вектор-член data непосредственно, т.к. объект является r-value, означая, 
+// что у него нет никаких других пользователей, поэтому данный объект можно изменить непосредственно.
+Foo Foo::sorted() &&
+{
+	std::cout << "sorted && called" << std::endl;
+	std::sort(data.begin(), data.end());
+	return *this;
+}
 
+// этот объект либо константа, либо l-value. его нельзя сортировать на месте
+Foo Foo::sorted() const &
+{
 
+#if 1
+	std::cout << "sorted const & called" << std::endl;
+
+	Foo ret(*this);
+	//return ret.sorted();	// вызывает рекусивно эту же ф-ию и зацикливается т.к. ret - l-value
+
+	return Foo(*this).sorted();	// вызывает версию && для r-value, т.к Foo(*this) - r-value
+#else
+	Foo ret(*this);	// создать копию
+	std::sort(ret.data.begin(), ret.data.end()); // отсортировать копию
+	return ret;	// вернуть копию
+#endif
+}
