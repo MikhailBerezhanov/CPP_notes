@@ -33,10 +33,14 @@ public:
 	// и присвоения при перемещении
 
 	StrVec(StrVec&&) noexcept;	// не будет передавать исключений
+
+	~StrVec();
+
 	// оператор присвоения перемещения
 	StrVec& operator= (StrVec&&) noexcept;
 
-	~StrVec();
+	std::string& operator[] (std::size_t n) { return elements[n]; }
+	std::string& operator[] (std::size_t n) const { return elements[n]; }
 
 	void push_back(const std::string&);	// версия использующая копирование
 	void push_back(std::string&&);		// версия использующая перемещение
