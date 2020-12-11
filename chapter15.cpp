@@ -16,7 +16,7 @@
 #include <new>					// bad_alloc, nothrow
 #include <functional>			// библиотечные объекты-функции
 
-#include "Text_query.h"
+#include "Query.h"
 #include "exercises.h"
 
 // объявление класса
@@ -68,6 +68,10 @@ public:
 	// ф-ии по указателю или ссылке на объект. При наследовании может быть переопределена производным классом
 	// ПРИМ: для виртуальных ф-ий аргументы по умолчанию определяются в базовом классе
 	virtual double net_price(std::size_t n = 0) const { return n*price; }
+
+	// виртуальное копирование объектов (возвращает динамически созданную копию объекта)
+	virtual Quote* clone() const & { return new Quote(*this); }			// копирование
+	virtual Quote* clone() && { return new Quote(std::move(*this)); }	// перемещение
 
 // Защищенный доступ - закрыто от пользователей класса, но открыто для производный классов при наследовании
 protected:
@@ -139,6 +143,9 @@ public:
 	// 		производный(параметры) : базовый(аргументы) {}
 	// если у производного класса есть какие-нибудь собственные члены, они инициализируются по умолчанию.
 #endif
+
+	// ПРИМ: виртуальный деструктор наследуется и для базовой части вызывает автоматически 
+
 	// переопределение базовой версии для реализации политики скидок
 	double net_price(std::size_t) const override;
 
@@ -149,6 +156,11 @@ public:
 	// класса и предотвращает прямой доступ к нему
 	//std::size_t quantity - Скрыло бы доступ к членам Disc_quote
 	//double discount;
+
+
+	// иртуальное копирование
+	Bulk_quote* clone() const & { return new Bulk_quote(*this); }		// копирование
+	Bulk_quote* clone() && { return new Bulk_quote(std::move(*this)); }	// перемещение
 };
 
 // Виртуальный ф-ии с аргументами по умолчанию должны использовать те же значения аргументов в базовом и производных классах
@@ -257,6 +269,48 @@ struct Derived_from_Private : public Priv_Derv
 };
 
 
+class Basket
+{
+public:
+	// использует синтезируемый стандартный конструктор - ф-ии члены управления копированием
+
+	void add_item(const std::shared_ptr<Quote>& sale) { items.insert(sale); }
+
+	// чтобы каждый раз не передавать ф-ии add_item вызов make_shared() можно постпуить имитировать виртуальное копирование
+	// ПРИМ: внури ф-ии не получится вызывать make_shared<Quote> или new Quote потоумчто могут передавать объекты
+	// производного класса такие как Bulk_quote и указатель Quote будет отсекать часть членов производного класса.
+	// Поэтому реализуется специальная версия, поддерживающая виртуальное копирование объектов базового класса Quote
+	void add_item(const Quote& sale) { items.insert(std::shared_ptr<Quote>(sale.clone())); }		// копирование
+	void add_item(Quote&& sale) { items.insert(std::shared_ptr<Quote>(std::move(sale).clone())); }	// перемещение
+	// ПРИМ: ф-ия clone() - виртуальная, какая именно версия будет вызвана зависит от динамического типа объекта
+	// т.к. указатель shared_ptr поддерживает преобразование производного класса в базовый, указатель shared_ptr<Quote>
+	// можно привязать к Bulk_quote* .
+
+	double total_receipt(std::ostream& os) const;
+private:
+	// ф-ия сравнения shared_ptrs необходима для упорядочения набора multiset
+	static bool compare (const std::shared_ptr<Quote>& lhs, const std::shared_ptr<Quote>& rhs)
+		{ return lhs->isbn() < rhs->isbn(); }
+
+	// набор содержит несколько стратегий расценок, упорядоченных по bookNo
+	std::multiset<std::shared_ptr<Quote>, decltype(compare)*> items{compare};
+};
+
+double Basket::total_receipt(std::ostream& os) const
+{
+	double sum = 0.0;
+
+	// iter указывает на первый элемент в пакете эл-тов стем же bookNo. 
+	// upper_bound() возвращает итератор на эл-т сразу после конца этого пакета
+	for(auto iter = items.cbegin(); iter != items.cend(); iter = items.upper_bound(*iter)){
+
+		// *iter - shared_ptr<Quote>, **iter - то что находится по умному указателю (объект Quote)
+		sum += print_total(os, **iter, items.count(*iter));
+	}
+
+	os << sum;
+	return sum;
+}
 
 
 void chapter15 (void)
@@ -315,38 +369,30 @@ void chapter15 (void)
 	std::cout << basket.back()->net_price(15) << std::endl;	// net_price заивисит от динамического объекта для которого вызвана
 
 
+	Basket bsk;
+	bsk.add_item(std::make_shared<Quote>("123", 45));
+	bsk.add_item(std::make_shared<Bulk_quote>("345", 45, 3, .15));
+
+
+	// const char* преобразуется в string , затем вызывается соответсвующий конструктор Query
+	// приоритет вычисления выражения сохранятся как у встроенных операторов, т.к. перегрузка его не меняет
+	// ПРИМ: порядок создания объектов не гарантируется компилятором
+	// 1. Вызывается конструктор Query для "wind", который вызывает конструктор WordQuery для создания его объекта   
+	// 2. Вызывается конструктор Query для "bird", который вызывает конструктор WordQuery для создания его объекта
+	// 3. Вызывается онструктор Query для "fiery", который вызывает конструктор WordQuery для создания его объекта
+	// 4. вызывается оператор AND (&) операнды которого содержат указатели на два объекта WordQuery, который 
+	//    создает объект Query с указателем на объект AndQuery
+	// 5. при создании объекта AndQuery вызывается его конструктор, вызывающий конструктор BinaryQuery, сохраняющий
+	//    два операнда типа Query
+	// 6. В результате создан объект AndQuery, хранящий свои операнды. Как результат & возвращется указатель на этот
+	// 	  созданный объект и запускается закрытый конструктор Query, создабщий временный объект - результат операции &.
+	// 7. Обрабатывается выражение | , в качестве левого операнда которого используется результат из п.6 , а првого -
+	//	  результат из п.1 - объект Query хранящий указатель на WordQuery "wind"
+	// 8. Вызывается конструктор OrQuery , вызывающий конструкторк BinaryQuery, который сохраняет операнды в объекте
+	//	  OrQuery.
+	// 9. Результат выполнения оператора | хранится в виде указателя в объекте qry
+	Query qry = Query("fiery") & Query("bird") | Query("wind");
 }
 
 
-class Basket
-{
-public:
-	// использует синтезируемый стандартный конструктор - ф-ии члены управления копированием
 
-	void add_item(const std::shared_ptr<Quote>& sale) { items.insert(sale); }
-
-	double total_receipt(std::ostream& os) const;
-private:
-	// ф-ия сравнения shared_ptrs необходима для упорядочения набора multiset
-	static bool compare (const std::shared_ptr<Quote>& lhs, const std::shared_ptr<Quote>& rhs)
-		{ return lhs->isbn() < rhs->isbn(); }
-
-	// набор содержит несколько стратегий расценок, упорядоченных по bookNo
-	std::multiset<std::shared_ptr<Quote>, decltype(compare)*> items{compare};
-};
-
-double Basket::total_receipt(std::ostream& os) const
-{
-	double sum = 0.0;
-
-	// iter указывает на первый элемент в пакете эл-тов стем же bookNo. 
-	// upper_bound() возвращает итератор на эл-т сразу после конца этого пакета
-	for(auto iter = items.cbegin(); iter != items.cend(); iter = items.upper_bound(*iter)){
-
-		// *iter - shared_ptr<Quote>, **iter - то что находится по умному указателю (объект Quote)
-		sum += print_total(os, **iter, items.count(*iter));
-	}
-
-	os << sum;
-	return sum;
-}
