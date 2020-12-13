@@ -75,6 +75,11 @@ public:
 					  std::shared_ptr<std::vector<std::string>> pv ):
 				sought(s), lines_set(ps), lines_vec(pv) {}
 
+	std::set<line_no>::iterator begin() const { return lines_set->begin(); }
+	std::set<line_no>::iterator end() const { return lines_set->end(); }
+
+	std::shared_ptr<std::vector<std::string>> get_file() const { return lines_vec; }
+
 private:
 	std::string sought;	// слово, представляющее запрос
 	std::shared_ptr<std::set<line_no>> lines_set;

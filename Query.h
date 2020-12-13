@@ -38,6 +38,7 @@
 //
 
 class Query;
+class WordQuery;
 
 // абстрактный класс, определяющий ф-ии запросов (нельзя создать его объект)
 class Query_base
@@ -64,8 +65,8 @@ public:
 	Query(const std::string&); // создает новый WordQuery
 
 	// ф-ии итерфейса: вызывают соответсвующую ф-ию производного объекта от класса Query_base
-	Query_result_heap eval(const Text_query_heap& t) const { q->eval(t); }
-	std::string rep() const { q->rep(); } 
+	Query_result_heap eval(const Text_query_heap& t) const { return q->eval(t); }
+	std::string rep() const { return q->rep(); } 
 private:
 	// Закрытый конструктор
 	Query(std::shared_ptr<Query_base> query): q(query) { std::cout << "hidden Query constructor called" << std::endl; }
@@ -80,12 +81,14 @@ class WordQuery : public Query_base
 {
 	friend class Query; // дружба не наследуется (нужна для вызова конструктора WordQuery)
 	// все члены закрытые
-	WordQuery(const std::string& s): query_word(s) { std::cout << "WordQuery constructor called" << std::endl; }
+public:
+	WordQuery(const std::string& s): query_word(s) { std::cout << "WordQuery constructor called for "<< query_word << std::endl; }
 
-	Query_result_heap eval(const Text_query_heap& t) const override { t.query(query_word); }
+	Query_result_heap eval(const Text_query_heap& t) const override { return t.query(query_word); }
+
 	std::string rep() const override 
 	{ 
-		std::cout << "WordQuery::rep() called" << std::endl;
+		std::cout << "WordQuery::rep() called for '" << query_word << "'" << std::endl;
 		return query_word; 
 	}
 

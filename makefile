@@ -36,6 +36,7 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)chapter14.cpp \
 			$(SRC)Query.cpp \
 			$(SRC)chapter15.cpp \
+			$(SRC)chapter16.cpp \
 		  
 LLIBS=
 

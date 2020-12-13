@@ -392,6 +392,18 @@ void chapter15 (void)
 	//	  OrQuery.
 	// 9. Результат выполнения оператора | хранится в виде указателя в объекте qry
 	Query qry = Query("fiery") & Query("bird") | Query("wind");
+
+	// 1. вызов rep() класса Query, который вызывает по указателю OrQuery BinaryQuery.rep()
+	// 2. BinaryQuery.rep() вызывает rep() для своих операндов (левого и правого)
+	// 3. левый операнд п.2. - AndQuery, вызывает rep() для своих операндов
+	// 4. операнды п.3 - WordQuery  выводят свои строки
+	// 5. правый операнд OrQuery - объект WordQuery, выводит свою строку
+	std::cout << qry << std::endl;
+
+	std::ifstream in_file("trans.txt");
+	Text_query_heap tqh(in_file);
+	auto res = qry.eval(tqh);
+	print(std::cout, res);
 }
 
 
