@@ -34,3 +34,45 @@ void Str_blob::pop_back() const
 
 	return data->pop_back();
 }
+
+
+
+// --- Шаблонная версия ---
+template<typename T>
+int Blob<T>::example = 1;
+
+template<typename T>
+Blob<T>::Blob(): data(std::make_shared<std::vector<T>>()) {}
+
+template<typename T>
+Blob<T>::Blob(std::initializer_list<T> il): data(std::make_shared<std::vector<T>>(il)) {}
+
+template<typename T>
+void Blob<T>::check(size_type i, const std::string &msg) const
+{
+	if(i >= data->size()) throw std::out_of_range(msg);
+}
+
+template<typename T>
+T& Blob<T>::front() const
+{
+	check(0, "front on empty Blob");
+
+	return data->front();
+}
+
+template<typename T>
+T& Blob<T>::back() const
+{
+	check(0, "back on empty Blob");
+
+	return data->back();
+}
+
+template<typename T>
+void Blob<T>::pop_back() const
+{
+	check(0, "pop_back on empty Blob");
+
+	return data->pop_back();
+}
