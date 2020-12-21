@@ -168,6 +168,14 @@ void StrVec::push_back(std::string&& s)
 	alloc.construct(first_free++, std::move(s));	// будет использован конструктор перемещения строки
 }
 
+template<typename... Args> inline
+void StrVec::emplace_back(Args&& ... args)
+{
+	check_n_alloc();
+	alloc.construct(first_free++, std::forward<Args>(args)...);
+}
+
+
 
 
 // ПРИМ: Если у ф-ии-члена есть квалификатор ссылки, то у всех версий этой ф-ии с тем же список параметров

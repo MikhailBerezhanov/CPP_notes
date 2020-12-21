@@ -50,6 +50,7 @@ public:
 
 	//reserve();
 	//resize();
+	template<typename... Args> void emplace_back(Args&& ...);
 
 	std::string* begin() const { return elements; }
 	std::string* end() const { return first_free; }

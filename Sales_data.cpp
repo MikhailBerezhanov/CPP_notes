@@ -65,7 +65,18 @@ bool compare_isbn(const Sales_data& o1, const Sales_data& o2)
 	return o1.isbn() < o2.isbn(); 
 }
 
+bool operator== (const Sales_data& lhs, const Sales_data& rhs)
+{
+	return lhs.isbn() == rhs.isbn();
+}
 
+namespace std
+{
+	size_t hash<Sales_data>::operator() (const Sales_data& s) const
+	{
+		return hash<string>()(s.bookNo) ^ hash<unsigned>()(s.units_sold) ^ hash<double>()(s.revenue);
+	}
+}
 
 // Exercise
 // Класс сначала ищет определения типов внутри своего тела, затем в глобальной области, однако тип 

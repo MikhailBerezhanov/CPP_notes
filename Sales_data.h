@@ -19,6 +19,8 @@ class /*struct*/ Sales_data
 friend std::ostream& print(std::ostream&, const Sales_data&);
 friend std::istream& read(std::istream&, Sales_data&); 
 
+friend class std::hash<Sales_data>;
+
 public:
 	// Определение типов используемых в классе
 	typedef std::string::size_type sz;
@@ -49,6 +51,7 @@ public:
 												// возможности использования метода как с константыми объектами, так и с обычными
 	Sales_data& combine(const Sales_data&); 
 	double avg_price() const;
+
 private:
 	// Закрытые Переменные-члены. Представляют собой реализацию класса
 	// ПРИМ: Конструкторы инициализирует переменные в том порядке, в котором они объявлены в классе, 
@@ -69,6 +72,25 @@ Sales_data add(const Sales_data&, const Sales_data&);
 std::ostream& print(std::ostream&, const Sales_data&);
 std::istream& read(std::istream&, Sales_data&); 
 bool compare_isbn(const Sales_data& o1, const Sales_data& o2);
+bool operator== (const Sales_data& lhs, const Sales_data& rhs);
+
+// Спецификация класса hash для использования типа  Sales_data
+namespace std 	// открытие пространства имен
+{ 
+ 	template<>
+ 	struct hash<Sales_data>
+ 	{
+ 		typedef size_t result_type;
+ 		typedef Sales_data argument_type;	// по умолчанию этому типу требуется опрератор ==  
+
+ 		size_t operator() (const Sales_data& s) const;
+ 	};
+}				// закрытие пространства имен
+
+
+
+
+
 
 
 

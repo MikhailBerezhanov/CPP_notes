@@ -58,6 +58,7 @@ const int str_blob_test = 10;
 // 2. Когда друг сам является шаблоном, предоставляющий дружественные отношения класс контролирует на какие 
 //	  экземпляры распросраняется дружба.
 
+// ПРИМ: При объявлении шаблона класса создаются экземпляры всех его членов!
 template<typename T> class BlobPtr;	// объявление шаблона класса, НЕ определение
 
 
@@ -93,6 +94,9 @@ public:
 
 	int use_count() const { return data.use_count(); }
 	bool unique() const { return data.unique(); }
+
+	// член-шаблон (конструктор из эл-тов различных контейнеров)
+	template<typename It> Blob(It b, It e);	
 
 private:
 	std::shared_ptr<std::vector<T>> data;
