@@ -41,11 +41,15 @@ void Str_blob::pop_back() const
 template<typename T>
 int Blob<T>::example = 1;
 
+// Исключение может происзойти во время инициализации. Единственный способ его обработать, добавить try
+// в блок инициализации, а обработчик поместить после тела конструктора
 template<typename T>
-Blob<T>::Blob(): data(std::make_shared<std::vector<T>>()) {}
+Blob<T>::Blob() try: data(std::make_shared<std::vector<T>>()) {}
+catch(const std::bad_alloc& e){}	// обработчик связан с блоком try списка инициализации
 
 template<typename T>
-Blob<T>::Blob(std::initializer_list<T> il): data(std::make_shared<std::vector<T>>(il)) {}
+Blob<T>::Blob(std::initializer_list<T> il) try: data(std::make_shared<std::vector<T>>(il)) {}
+catch(const std::bad_alloc& e){}
 
 template<typename T>
 void Blob<T>::check(size_type i, const std::string &msg) const

@@ -1,6 +1,6 @@
 CCPP=g++
 CC=gcc
-CFLAGS=
+CFLAGS=-std=c++11
 #CFLAGS=-Wall -Wno-format-security -Wno-unused-variable -Wno-unused-function
 
 # Default value for application home path
@@ -37,6 +37,7 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)Query.cpp \
 			$(SRC)chapter15.cpp \
 			$(SRC)chapter16.cpp \
+			$(SRC)chapter18.cpp \
 		  
 LLIBS=
 
