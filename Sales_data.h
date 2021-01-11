@@ -52,6 +52,8 @@ public:
 	Sales_data& combine(const Sales_data&); 
 	double avg_price() const;
 
+	Sales_data& operator+= (const Sales_data& rhs);
+
 private:
 	// Закрытые Переменные-члены. Представляют собой реализацию класса
 	// ПРИМ: Конструкторы инициализирует переменные в том порядке, в котором они объявлены в классе, 
@@ -73,6 +75,7 @@ std::ostream& print(std::ostream&, const Sales_data&);
 std::istream& read(std::istream&, Sales_data&); 
 bool compare_isbn(const Sales_data& o1, const Sales_data& o2);
 bool operator== (const Sales_data& lhs, const Sales_data& rhs);
+Sales_data operator+ (const Sales_data& lhs, const Sales_data& rhs);
 
 // Спецификация класса hash для использования типа  Sales_data
 namespace std 	// открытие пространства имен
@@ -88,9 +91,23 @@ namespace std 	// открытие пространства имен
 }				// закрытие пространства имен
 
 
+// Исключения, специфичные для класса
+class out_of_stock: public std::runtime_error
+{
+public:
+	explicit out_of_stock(const std::string& s): std::runtime_error(s) {} 
+};
 
+class isbn_mismatch: public std::logic_error
+{
+public:
+	explicit isbn_mismatch(const std::string& s): std::logic_error(s) {}
 
+	isbn_mismatch(const std::string& s, const std::string& lhs, const std::string& rhs):
+		std::logic_error(s), left(lhs), right(rhs) {}
 
+	const std::string left, right; 
+};
 
 
 

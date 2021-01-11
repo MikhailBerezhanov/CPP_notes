@@ -78,6 +78,31 @@ namespace std
 	}
 }
 
+
+Sales_data& Sales_data::operator+= (const Sales_data& rhs)
+{
+	if(isbn() != rhs.isbn()) throw isbn_mismatch("wrong isbns ", isbn(), rhs.isbn());
+
+	units_sold += rhs.units_sold;
+	revenue += rhs.revenue;
+	return *this;
+}
+
+Sales_data operator+ (const Sales_data& lhs, const Sales_data& rhs)
+{
+	Sales_data sum = lhs;
+	try{
+		sum += rhs;
+	}
+	catch(const isbn_mismatch& e){
+		std::cerr << "isbn_mismatch exception: " << e.what() << e.left << " " << e.right << std::endl;
+	}
+
+	return sum;
+}
+
+
+
 // Exercise
 // Класс сначала ищет определения типов внутри своего тела, затем в глобальной области, однако тип 
 // возвращаемого значения указывается раньше чем имя и принадлежность функции. Поэтому первый Type -

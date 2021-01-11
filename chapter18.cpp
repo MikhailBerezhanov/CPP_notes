@@ -63,6 +63,74 @@ public:
 };
 
 
+// ПРИМ: Глобально пространство имен определяется неявно и доступ к нему осуществляется через ::
+namespace test
+{
+	int i = 10;
+	void func(int arg);
+	// вложенное пр-во имен
+	namespace in
+	{
+		int i = 43;
+	}
+
+}
+
+// определение ф-ии вне пр-ва имен
+void test::func(int arg) { return; }
+
+// снова открыть и добавить (встроить) в уже существующее пр-во
+namespace test
+{
+	#include "namespace.h"
+}
+
+// Безымянное пр-во имен (у каждого файла свое и не может быть разобщено между разными файлами)
+// ПРИМ: определяет сущности локальные для каждого файла (аналог static)
+namespace
+{
+	int p;
+}
+
+// Псевдоним пр-ва имен
+namespace t_in = test::in;
+// Псевдоним типа
+using SD = Sales_data;
+
+
+namespace excersize
+{
+	int ivar = 0;
+	double dvar = 0;
+	const int limit = 1000;
+}
+
+int ivar = 1;
+
+// обявления using для всех членов пр-ва имен (добавят в глобальную область члены пр-ва)
+//using excersize::ivar; ОШИБКА уже есть такая переменная в глобальной области видимости
+using excersize::dvar;
+using excersize::limit;
+
+void manip()
+{
+	// pos2
+	double dvar = 3.14;
+	int iobj = limit + 1;
+	++ivar;
+	++::ivar;
+}
+
+
+
+template<typename T> void swap(T l, T r)
+{
+	using std::swap;	// без определения using произошла бы бесконечная рекурсия
+	std::cout << "my swap() called" << std::endl;
+	swap(l, r);
+}
+
+
 void chapter18 (void)
 {
 
@@ -74,7 +142,7 @@ void chapter18 (void)
 		std::cerr << "range_error: " << e.what() << '\n';	// what() НЕ передает исключения
 	}
 	catch(const std::exception& e) {
-		std::cerr << "exception error: " << e.what() << '\n';
+		std::cerr << "exception occured: " << e.what() << '\n';
 		
 	}
 	catch(...)
@@ -89,4 +157,34 @@ void chapter18 (void)
 	// ПРИМ: в наборе директив catch с типами, связанными наследованием, обработчик для более производных типов
 	// следует располагать прежде наимее производных (базовых)
 
+
+	test::i = 20;
+	test::in::i = 120;	// вложенное пр-во
+	test::d = 5.0;		// встроенное пр-во 
+	p = 9;				// безымянное пр-во
+
+
+	t_in::i = 130;
+	// Директива using . Дает доступ ко всему пр-ву имен
+	// ПРИМ: объявляется в глобальной, локальной или области видимости пр-ва имен. Не может быть внутри класса
+	using namespace test;	// с этой строчки программе становится достпуно пр-во имен
+	i = 30;
+	d = 4.43;
+
+	// Объявление using (локальный псевдоним для члена пр-ва имен) Не дает доступ ко всему пр-ву имен.
+	using std::string;
+	string s;
+
+
+	// ПРИМ: Когда объект класса передается ф-ии, компилятор ищет пр-во имен, в котором определяется
+	// класс аргумента в дополнение к обычному поиску области видимости (справедливо также для указателя и ссылки)
+	operator<<(std::cout, "chapter10 operator<<\n");
+	// Иначе пришлось бы вызывать std::operator<< или using std::operator<<
+
+	string s2;
+	swap(s, s2);	// вызовет std::swap , так как string и пр-ва имен std
+	swap(test::i, test::in::i);	// вызовет мой swap, т.к. для test swap() не определен, а в глобальной области есть
 }
+
+
+
