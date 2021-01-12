@@ -184,6 +184,9 @@ void chapter18 (void)
 	string s2;
 	swap(s, s2);	// вызовет std::swap , так как string и пр-ва имен std
 	swap(test::i, test::in::i);	// вызовет мой swap, т.к. для test swap() не определен, а в глобальной области есть
+
+
+	multi_inheritance_test();
 }
 
 

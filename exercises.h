@@ -20,4 +20,7 @@ void chapter17 (void);
 void chapter18 (void);
 void chapter19 (void);
 
+
+int multi_inheritance_test();
+
 #endif // _EXERCISES_H
