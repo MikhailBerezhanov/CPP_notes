@@ -85,16 +85,11 @@ enum values
 };
 
 //  Перечисление с ограниченной зоной видимостью
-enum class enum_class
+enum class enum_class: unsigned long long
 {
 	one = 1,
 	two,
 	three
-};
-
-enum class test: unsigned long long
-{
-	one,
 };
 
 

@@ -39,6 +39,7 @@ SRC_FILES=	$(SRC)main.cpp \
 			$(SRC)chapter16.cpp \
 			$(SRC)chapter18.cpp \
 			$(SRC)chapter18_multi_inheritance.cpp \
+			$(SRC)chapter19.cpp \
 		  
 LLIBS=
 
