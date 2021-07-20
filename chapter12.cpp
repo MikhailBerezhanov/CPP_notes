@@ -91,6 +91,21 @@ static std::unique_ptr<char[]> my_concat(const char* str1, const char* str2)
 	return up;
 }
 
+// Передача умного указателя в функцию
+// unique_ptr - только по значению для корректной работы. При этом из-за отсутсвия 
+// конструктора копирования вызывать надо через перемещение func2(std::move(ptr))
+static void func2 (std::unique_ptr<int> uptr)
+{
+	// Вызывается func2(std::move(ptr)) 
+} // Здесь uptr удаляется
+
+// ИЛИ 
+static void func3 (int *ptr)
+{
+	// Вызывается func3(uptr.get()) - передачей сырого указателя
+}
+
+
 
 void chapter12 (void)
 {
@@ -179,6 +194,15 @@ void chapter12 (void)
 	std::unique_ptr<int[]> up2(new int[10]{1,2,3});
 	// также поддерживает индексацию в отличие от shared_ptr
 	up2[3] = 43;
+
+
+	// ПРИМ: Deleter является частью типа у unique_ptr и частью конструктора у shared_ptr 
+	auto lambda = [q2] (FILE* fp) { if(fp) fclose(fp); }
+
+	// Допусткается в качестве deleter'a использовать функтор (лямбда функцию). Если она имеет
+	// список захвата, наобходимо в качесте типо использовать шаблон std::function<>
+	std::unique_ptr<FILE, std::function<void(FILE*)> ex_uptr (fopen("test"), lambda);
+
 
 	// weak_ptr не контролирует продолжительность существования объекта, на который указывает. он только указывает 
 	// на объект, который контролирует shared_ptr. Пивыязка weak_ptr к shared_ptr не имезняет счетчик ссылок.
