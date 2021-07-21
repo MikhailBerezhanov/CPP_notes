@@ -41,6 +41,8 @@ void chapter3 (void)
 		decltype(str.size()) size = 0;	// имеет тип  std::string::size_type
 		size = str.size();
 
+		// Цикл for для диапазона (С++11). The range-based for
+		// Объект должен быть итерируемым ( иметь begin(), end(), ++)
 		for(auto c : str) {
 			std::cout << ' ' << c << std::endl; 
 			c = 'a';	// изменяет значение управляющей переменной, но не строки. для изменения

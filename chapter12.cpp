@@ -14,6 +14,7 @@
 #include <utility>				// pair
 #include <memory>				// shared_ptr, unique_ptr, weak_ptr, allocator
 #include <new>					// bad_alloc, nothrow
+#include <functional>			// function 
 
 #include "Str_blob.h"
 #include "Text_query.h"
@@ -197,11 +198,11 @@ void chapter12 (void)
 
 
 	// ПРИМ: Deleter является частью типа у unique_ptr и частью конструктора у shared_ptr 
-	auto lambda = [q2] (FILE* fp) { if(fp) fclose(fp); }
+	auto lambda = [q2] (FILE* fp) { if(fp) fclose(fp); };
 
 	// Допусткается в качестве deleter'a использовать функтор (лямбда функцию). Если она имеет
 	// список захвата, наобходимо в качесте типо использовать шаблон std::function<>
-	std::unique_ptr<FILE, std::function<void(FILE*)> ex_uptr (fopen("test"), lambda);
+	std::unique_ptr<FILE, std::function<void(FILE*)>> ex_uptr (fopen("trans.txt", "r"), lambda);
 
 
 	// weak_ptr не контролирует продолжительность существования объекта, на который указывает. он только указывает 

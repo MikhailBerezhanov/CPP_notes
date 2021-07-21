@@ -98,11 +98,11 @@ void chapter11 (void)
 {
 	//words_occurence();
 
-	// ключ - фамилия семьи, значение - веток имен детей
+	// ключ - фамилия семьи, значение - вектор имен детей
 	std::map<std::string, std::vector<std::string>> family { {"Berezhanovs", {"Mik","Petr","Irina"}} };
 	family["Trololo"] = {"Vasya", "Vova"};
 
-	// ПРИМ: если требуется нестандартная операция сравнения для сортировке, ее можно передать при определении контейнера
+	// ПРИМ: если требуется нестандартная операция сравнения для сортировки, ее можно передать при определении контейнера
 	// в виде УКАЗАТЕЛЯ на функцию
 	std::multiset<Sales_data, decltype(compare_isbn)* > bookstore(compare_isbn);// набор неуникальных значений , отсортированный по ISBN
 	std::multimap<Sales_data, int, bool (*)(const Sales_data& o1, const Sales_data& o2)> bookstore2(compare_isbn);// аналогично, но карта
@@ -145,8 +145,8 @@ void chapter11 (void)
 	std::multiset<Sales_data>::iterator it3 = bookstore.begin();
 
 
-	// ПРИМ: для контейнеров с уникальными эл-тами inrest возвращает пару с итератором и флагов был ли эл-т вставлен
-	// у контейнеров, допускающих совпадение ключей, insert() возвращает тератор на новый эл-т
+	// ПРИМ: для контейнеров с уникальными эл-тами insert возвращает пару с итератором и флагов был ли эл-т вставлен
+	// у контейнеров, допускающих совпадение ключей, insert() возвращает итератор на новый эл-т
 	auto ret = family.insert( {"Berezhanovs", {"Balodya", "Misha", "Kolya"}} );
 	if(!ret.second) std::cout << ret.first->first << " already exists in map. not insertred" << std::endl;
 
