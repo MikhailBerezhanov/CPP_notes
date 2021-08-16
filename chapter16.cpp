@@ -24,7 +24,7 @@
 // Шаблон финкции
 template <class T>	// список параметров в определении шаблона не может быть пустым (допускается typemane или class)
 					// тип Т шаблона выбирается компилятором при вызове ф-ии из типов переданных аргументов
-					// ПРИМ: при этом созданяет ЭКЗЕМПЛЯТР ШАБЛОНА
+					// ПРИМ: при этом созданяет ЭКЗЕМПЛЯР ШАБЛОНА
 int compare (const T& v1, const T& v2)
 {
 	// не все типы могут поддерживать оба оператора < и > поэтому лучше использовать какой-то один, или стандартные
@@ -41,7 +41,7 @@ int compare (const T& v1, const T& v2)
 // первый параметр шаблона представляет размер первого массива, второй - второго. 
 // Шаблон может быть объявлен как inline и constexpr
 template<unsigned N, unsigned M> inline
-int compare (const char (&p1)[N], const char (&p2)[M])	// ссылка на миссив неизвестный длины( без скобок - массив ссылок )
+int compare (const char (&p1)[N], const char (&p2)[M])	// ссылка на массив неизвестной длины( без скобок - массив ссылок )
 {
 	return std::strcmp(p1, p2);
 }
@@ -276,6 +276,39 @@ template<class T> struct remove_reference<T&&>	// r-value ссылки
 };
 
 
+
+// Вывод типов (справедливо и для auto)
+// 1. ParamType представляет собой указатель или ссылку, но не универсальную ссылку.
+// 2. ParamType является универсальной ссылкой
+// 3. ParamType не является ни указателем, ни ссылкой
+
+// ternplate<typename Т>
+// void f(ParamType param) ;
+// f(expr); // Вывод Т и ParamType из expr
+
+// 1. когда ParamType - ссылка или указатель: если типом expr является ссылка, ссылочная часть игнорируется
+template <typename T>
+void f_ref(T& param){}
+
+template <typename T>
+void f_const_ref(const T& param){}
+
+template <typename T>
+void f_ptr(T* param){}
+
+// 2. когда ParamType - универсальная ссылка:
+//		- если expr lvalue, T и ParamType выводятся как lvalue (так Т кодируется для std::forward)
+//		- если expr rvalue, применяются обычные правила (см п.1)
+template <typename T>
+void f_uni_ref(T&& param){}
+
+// 3. когда ParamType - ни ссылка, ни указатель (передается по значению)
+//		- если expr ссылка, ссылочная часть игнорируется
+//		- если после отбрасывания ссылочной части expr является const \ volatile, это также игнорируется
+template <typename T>
+void f_val(T param){}	// param является совершенно новым объектом (копией)
+
+
 void chapter16 (void)
 {
 	compare(1, 0); // T - int, создается экземпляр int compare (const int& , const int& )
@@ -340,7 +373,7 @@ void chapter16 (void)
 	std::for_each(vs.begin(), vs.end(), [](const std::string& s){ std::cout << s << " "; });
 	std::cout << std::endl;
 
-	auto x = func3(std::begin(a), std::end(a));
+	auto func3_res = func3(std::begin(a), std::end(a));
 
 
 	// Сворачивание ссылок
@@ -371,4 +404,84 @@ void chapter16 (void)
 	woo(s1, 42, "hi");	// 2 параметра в пакете
 	woo(d, s1);			// 1 параметра в пакете
 	woo("hi");			// пустой пакет
-}
+
+
+
+	// Вывод типов 
+	// 1. (ParamType - ссылка или указатель) Если типом expr является ссылка, ссылочная часть игнорируется
+	int x = 27;
+	const int cx = x;
+	const int& rx = x; 
+	const int *px = &x;
+
+#ifdef HIDE_IT
+	template <typename T>
+	void f_ref(T& param);
+
+	template <typename T>
+	void f_const_ref(const T& param);
+
+	template <typename T>
+	void f_ptr(T* param);
+#endif
+
+	f_ref(x);			// T - int, тип param - int&
+	f_ref(cx);			// Т - const int, тип param - coпst int&
+	f_ref(rx);			// Т - const int, тип param - coпst int&
+
+	f_const_ref(x);		// T - int, тип param - const int&
+	f_const_ref(cx);	// Т - int, тип param - coпst int&
+	f_const_ref(rx);	// Т - int, тип param - coпst int&
+
+	f_ptr(&x);			// T - int, тип param - int*
+	f_ptr(px);			// T - const int, тип param - const int*
+
+	// 2. (ParamType - универсальная ссылка)
+#ifdef HIDE_IT
+	template <typename T>
+	void f_uni_ref(T&& param);
+#endif
+
+	f_uni_ref(x);		// x - lvalue, T - int&, тип param - int&
+	f_uni_ref(cx);		// cx - lvalue, T - const int&, тип param - const int&
+	f_uni_ref(rx);		// rx - lvalue, T - const int&, тип param - const int&
+	f_uni_ref(27);		// 27 - rvalue, T - int, тип param - int&&
+
+	// 3. (ParamType - ни ссылка, ни указатель) param - независимая копия. const , volatile игнорируются
+#ifdef HIDE_IT
+	template <typename T>
+	void f_val(T param);
+#endif
+
+	f_val(x);			// T - int, тип param - int
+	f_val(cx);			// T - int, тип param - int
+	f_val(rx);			// T - int, тип param - int
+
+
+	// ПРИМ: Когда переменная объявлена с использованием ключевого слова auto, оно играет
+	// роль Т в шаблоне, а спецификатор типа переменной действует как ParamType 
+
+								// Концептуальный шаблон вывода типа:
+	auto ax = 27;				// template<typename T> void func_for_x(T param);
+	const auto acx = ax;		// template<typename T> void func_for_cx(const T param);
+	const auto& arcx = ax;		// template<typename T> void func_for_rx(const T& param);
+
+	auto&& uref1 = x;	// x - lvalue, тип uref1 - int&
+	auto&& uref2 = cx;	// cx - const lvalue, тип uref2 - const int&
+	auto&& uref3 = 27;	// 27 - rvalue, тип uref3 - int&&
+
+	// Имена массивов и функций превращаются в указателя для спецификаторов типа, не являющихся ссылками.
+	const char name[] = "A.S. Pushkin";
+
+	auto arr1 = name;	// тип arr1 - const char*
+	auto& arr2 = name;	// тип arr2 - char (&) [13]
+
+	auto func1 = ff;	// тип func1 - void (*)(int, int& )
+	auto& func2 = ff;	// тип func2 - void (&)(int, int& )
+
+	// ПРИМ: Единственное отличие в выводе auto - {} как std::initializer_list<>
+	auto x1 = 27;		// тип int
+	auto x2 ( 27 );		// тип int
+	auto x3 = { 27 };	// тип std::initializer_list<int>
+	auto x4 { 27 };		// тип std::initializer_list<int>
+}	

@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
 	//chapter11();
 
-	chapter12();
+	//chapter12();
 
 	//chapter13();
 
@@ -155,11 +155,11 @@ int main(int argc, char* argv[])
 
 	//chapter15();
 
-	//chapter16();
+	chapter16();
 
 	//chapter18();
 
-	chapter19();
+	//chapter19();
 
 	return 0;
 }
