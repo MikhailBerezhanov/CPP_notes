@@ -28,30 +28,30 @@ DEFINES =
 
 SRC_FILES=	$(SRC_DIR)/main.cpp \
 			$(SRC_DIR)/Sales_data.cpp \
-			$(SRC_DIR)/chapter3.cpp \
-			$(SRC_DIR)/chapter4.cpp \
-			$(SRC_DIR)/chapter5.cpp \
-			$(SRC_DIR)/chapter6.cpp \
-			$(SRC_DIR)/chapter7.cpp \
-			$(SRC_DIR)/chapter8.cpp \
-			$(SRC_DIR)/chapter9.cpp \
-			$(SRC_DIR)/chapter10.cpp \
-			$(SRC_DIR)/chapter11.cpp \
+			$(SRC_DIR)/3_str_vec_arr.cpp \
+			$(SRC_DIR)/4_expressions.cpp \
+			$(SRC_DIR)/5_operators.cpp \
+			$(SRC_DIR)/6_functions.cpp \
+			$(SRC_DIR)/7_classes.cpp \
+			$(SRC_DIR)/8_iostreams.cpp \
+			$(SRC_DIR)/9_serial_containers.cpp \
+			$(SRC_DIR)/10_algorithms.cpp \
+			$(SRC_DIR)/11_assoc_containers.cpp \
 			$(SRC_DIR)/Str_blob.cpp \
 			$(SRC_DIR)/Text_query.cpp \
-			$(SRC_DIR)/chapter12.cpp \
+			$(SRC_DIR)/12_smart_pointers.cpp \
 			$(SRC_DIR)/Has_ptr.cpp \
 			$(SRC_DIR)/Message.cpp \
 			$(SRC_DIR)/StrVec.cpp \
-			$(SRC_DIR)/chapter13.cpp \
+			$(SRC_DIR)/13_copy_control.cpp \
 			$(SRC_DIR)/MyString.cpp \
-			$(SRC_DIR)/chapter14.cpp \
+			$(SRC_DIR)/14_operators_overload.cpp \
 			$(SRC_DIR)/Query.cpp \
-			$(SRC_DIR)/chapter15.cpp \
-			$(SRC_DIR)/chapter16.cpp \
-			$(SRC_DIR)/chapter18.cpp \
-			$(SRC_DIR)/chapter18_multi_inheritance.cpp \
-			$(SRC_DIR)/chapter19.cpp \
+			$(SRC_DIR)/15_OOP.cpp \
+			$(SRC_DIR)/16_templates.cpp \
+			$(SRC_DIR)/18_exceptions_namespaces.cpp \
+			$(SRC_DIR)/18_multi_inheritance.cpp \
+			$(SRC_DIR)/19_misc.cpp \
 			$(SRC_DIR)/threads_and_tasks.cpp \
 
 OBJS_FILES = $(SRC_FILES:.cpp=.o)
