@@ -2,3 +2,4 @@ obj/
 output/
 *.out
 val.txt
+build/
