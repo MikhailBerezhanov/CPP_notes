@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 #else
   const double outputValue = sqrt(inputValue);
 #endif
-  std::cout << "The square root of " << inputValue << " is   " << outputValue
+  std::cout << "The square root of " << inputValue << " is " << outputValue
             << std::endl;
   return 0;
 }
