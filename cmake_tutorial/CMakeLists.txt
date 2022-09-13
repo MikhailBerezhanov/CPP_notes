@@ -50,7 +50,10 @@ install(FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h" DESTINATION include)
 # Testing:
 # Rebuild the application and then cd to the binary directory and run the ctest executable: 
 # ctest -N and ctest -VV.
-enable_testing()
+# enable_testing()
+
+# enable dashboard scripting
+include(CTest)
 
 # does the application run
 add_test(NAME Runs COMMAND Tutorial 25)
