@@ -3,4 +3,4 @@ output/
 *.out
 val.txt
 build/
-CMakeFiles/*
+CMakeFiles/

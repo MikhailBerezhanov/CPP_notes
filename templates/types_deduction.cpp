@@ -29,7 +29,35 @@ void func_uni_ref(T &&param){}
 //		- argument's const (volatile) is omitted
 //
 template<typename T>
-void func_copy(T param){}	// by value
+void func_copy(T param)	// by value
+{
+	cout << param << endl;
+}
+
+// Templates with C-arrays
+// 
+template<typename T, std::size_t size>
+constexpr std::size_t size_of_array( T (&) [size] ) noexcept
+{
+	return size;
+}
+
+void arrays_deduction_feature()
+{
+	const char arr[13] = "abcrfgh";
+
+	func_copy(arr);		// T - const char*  - array is converted to pointer
+	func_copy(&arr[3]);	// T - const char*
+	func_copy(arr[3]);	// T - char
+
+	// BUT
+	func_lhs_ref(arr);	// T - const char [13], ParamType -  const char (&) [13]
+						// (reference to array of specified size)
+
+	cout << "size_of_array: " << size_of_array(arr) << endl;
+}
+
+
 
 int main()
 {
@@ -70,6 +98,35 @@ int main()
 	func_copy(ccptr);	// T - const char*, ParamType - const char*
 
 
+	// ---------------------------------------------------------------
+	// 'auto'  deduction works as template deduction (auto as ParamType)
+	// 		template<typename T>
+	// 		void auto_wrapper(auto_value param) 
+	//
+	// except for = {} - initialization. auto counts {} as std::initializer_list<>
+	//
+
+	auto x = 10;		// ParamType - T , 					=> auto_value - int
+	const auto &rx = x;	// ParamType - const T&, T - int  	=> auto_value - const int&
+
+	auto y = rx;		// ParamType - T , auto_value - int (copy) - const reference is omitted
+	y = 11;				// y is a copy, can be changed 
+
+	auto &rrx = rx;		// ParamType - T&, T - const int 	=> auto_value - const int&
+	// rrx = 12;			// Error - readonly 
+	cout << "rrx: " << rrx << ", rx: " << rx << ", x: " << x << endl;
+
+	// auto &arx = 100;		// ParamType - T&, T - int 	=> auto_value - int&	- Error
+	auto &&rvx = 100;	// r-value 
+
+	auto i = {999};		// Warning:  i is initializer list
+	// i = 10; 			// Error
+	// BUT 
+	auto ii{333}; 		// OK. auto_value - int 
+	cout << "ii: " << ii << endl;
+
+
+	arrays_deduction_feature();
 
 	return 0;
 }
