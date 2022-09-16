@@ -9,6 +9,9 @@ template<typename Derived>
 class Base
 {
 public:
+
+	~Base(){ cout << "~Base()" << endl; }
+
 	void virtual_func1()
 	{
 		static_cast<Derived*>(this)->virtual_func1();
@@ -19,6 +22,9 @@ public:
 class D : public Base< D >
 {
 public:
+
+	~D(){ cout << "~D()" << endl; }
+
 	void virtual_func1()
 	{
 		cout << "D::virtual_func1()" << endl;
@@ -28,7 +34,8 @@ public:
 
 int main()
 {
-	unique_ptr<Base<D>> ubp(new D);
+	// unique_ptr<Base<D>> ubp(new D);
+	shared_ptr<Base<D>> ubp(new D);		// calls D destructor properly
 
 	ubp->virtual_func1();
 
