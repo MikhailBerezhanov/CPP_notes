@@ -31,3 +31,7 @@ constexpr int sqr(int x) // external (weak) linkage
 {
 	return x * x;
 }
+
+
+// placed to cpp file (compilation unit) as included
+static int sval = 123; // internal linkage
