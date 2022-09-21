@@ -92,11 +92,85 @@ void smart_pointers_with_ctr_exceptions()
 }
 
 
+void weak_ptr_usage()
+{
+	// weak_ptr constructed from a std::shared_ptr or std::weak_ptr 
+	// that will be viewed by this std::weak_ptr.
+	// It may be nulltpr ( .use_count == 0 )
+ 
+	std::weak_ptr<string> w_ptr;
+
+	{
+		auto ptr = std::make_shared<std::string>("string in heap");
+		w_ptr = ptr;
+		std::cout << "w_ptr.use_count() inside scope: " << w_ptr.use_count() << '\n';
+
+
+		// creates a shared_ptr that manages the referenced object.
+		// returns expired() ? shared_ptr<T>() : shared_ptr<T>(*this)
+		// executed atomically 
+		auto s_ptr = w_ptr.lock();	
+
+		if(s_ptr){
+			cout << "w_prt.lock returns: " << *s_ptr << endl;
+		}
+
+		std::cout << "w_ptr.use_count() inside scope: " << w_ptr.use_count() << '\n';
+	}
+
+	std::cout << "w_ptr.use_count() out of scope: " << w_ptr.use_count() << '\n';
+	std::cout << "w_ptr.expired() out of scope: " << std::boolalpha << w_ptr.expired() << '\n';
+
+}
+
+void make_smart_pointers()
+{
+	{
+		// Uses two allocations: 
+		//   1. for object (double)
+		//   2. for Control block 
+		std::shared_ptr<double> sptr1(new double); 
+
+		// Advantages:  object is stored independantly of
+		// Control block. So when reference_counter will reach 0
+		// object will be deleted.
+	}
+	
+	{
+		// Uses one allocation. Object is stored in Control block. 
+		// So when reference_counter will reach 0, object will not be 
+		// deleted if weak_reference_counter is set
+		// (i.e. until weak_ptrs exists). 
+		//
+		// No support for custom_deleter 
+		//
+		auto sptr2 = std::make_shared<double>();
+
+		std::weak_ptr<double> wptr(sptr2);
+
+		sptr2.reset();
+		// object's memory not released, because weak_ptr exists and uses
+		// same Control block
+
+
+		// some code (memory of object is not freed)
+
+
+	}	// weak_reference_counter decreases -> Control block with object released
+
+
+
+}
+
+
 
 int main()
 {
 	smart_pointers_with_ctr_exceptions();
 
+	make_smart_pointers();
+
+	weak_ptr_usage();
 
 	return 0;
 }
