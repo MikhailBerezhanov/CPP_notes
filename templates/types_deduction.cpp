@@ -9,13 +9,13 @@ using namespace std;
 // 		- argument's reference is omitted while type deduction 
 //
 template <typename T>
-void func_lhs_ref(T &param) 	// ParamType is T& may be noq equal with T
+void func_lhs_ref(T &param) 	// ParamType is T& may be not equal with T
 {
 }
 
 // same rules
 template <typename T>
-void func_cptr(T *param){}
+void func_ptr(T *param){}
 
 // 2. ParamType is universal reference
 //		- argument is l-value -> T and ParamType will be l-value references both.
@@ -70,22 +70,26 @@ int main()
 	func_lhs_ref(ca);	// T - const int, 	ParamType - const int&
 	// NOTE: reference of variable will be omitted
 	func_lhs_ref(ra);	// T - const int, 	ParamType - const int&
+	
+	// ERRORs: cannot bind non-const lvalue ref with rvalue
+	//func_lhs_ref(13);
+	//func_lhs_ref(std::move(a));
+	// BUT const lvalue ref can be bind with rvalue
+	func_lhs_ref(std::move(ca));	// T - const int , ParamType - const int&
 
-	// It is safe to pass const variables as  T& params
+	// It is safe to pass const variables as  T& (T*) params
 	// because T will be instantiated as const int. 
 
-	func_cptr(&a);		// T - int,			ParamType - const int*
-	func_cptr(&ca);		// T - const int,	ParamType - const int*
-	func_cptr(&ra);		// T - const int,	ParamType - const int*
-
-	// func_lhs_ref(15);	// error: cannot bind nonconst l-value reference to an r-value
+	func_ptr(&a);		// T - int,			ParamType - int*
+	func_ptr(&ca);		// T - const int,	ParamType - const int*
+	func_ptr(&ra);		// T - const int,	ParamType - const int*
 
 	// 2. ------------------------------------------------------------
 	func_uni_ref(a);	// T - int&, 		ParamType - int&
 	func_uni_ref(ca);	// T - const int&,	ParamType - const int&
 	func_uni_ref(ra);	// T - const int&,	ParamType - const int&
 	func_uni_ref(15);	// T - int,			ParamType - int&&	(15 is r-value)
-
+	func_uni_ref(std::move(a));	// T - int,	ParamType - int&&	(r-value)
 
 	// 3. ------------------------------------------------------------
 	func_copy(a);		// T - int,			ParamType - int
