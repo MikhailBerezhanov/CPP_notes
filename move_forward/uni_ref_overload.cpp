@@ -2,6 +2,11 @@
 #include <string>
 #include <set>
 #include <chrono>
+#include <utility>	// std::forward, std::remove_reference, 
+#include <type_traits>
+					// std::true_type, std::false_type
+					// std::is_integral, std::is_same, std::is_base_of
+					// another template functions
 
 using namespace std;
 
@@ -43,7 +48,7 @@ void log_and_add_test()
 	log_and_add(15);		// OK - called int version
 
 	//log_and_add(name_idx);	// ERROR - called uni ref version as best candidate 
-							// T = short  VS  short to int 
+							// T = short wins  VS  short_to_int conversion
 							// no std::string constructor accepts short
 
 	// NOTE: uni ref is greedy when overloads take place. 
@@ -124,11 +129,118 @@ public:
 
 
 
+// Possible solutions:
+// 1. Do not use overloads for functions with universal reference parameter(s).
+//    (use different names for functions with different parameters types:
+// 		log_and_add_name(), log_and_add_name_index() ). 
+// 	  But this approach will not work with contsructors, bacuse it's name is
+//	  fixed.
+//
+// 2. Use argument passing by value:
+class Person2
+{
+public:
+	explicit Person2(string s): name(std::move(s)) {} 
+
+	explicit Person2(int idx): name("name_from_index") {}
+
+	// const char* and string objects will call Person(string s) Ctr
+	// size_t , short, long , etc.. will call Person(int) Ctr
+
+	// But no direct passing advantages works =(
+
+private:
+	string name;
+};
+
+// 3. Descriptors dispatching (Диспетчеризация декстрипторов)
+// - use additional function parameter for correct overload deduction
+//
+
+// Declaration of new version
+template <typename T>
+void log_and_add_v2(T &&);
+
+// Worker function Implementation
+//
+// значения true и false являются значениями времени выполнения, а нам 
+// для выбора верной версии log_and_add_impl необходимо разрешение перегрузки, 
+// т.е. явление времени компиляции. 
+// Это означает, что нам нужен тип, соответствующий значению true, и другой тип, 
+// соответствующий значению false . Такая необходимость - настолько распространенное 
+// явление, что стандартная библиотека предоставляет то, что нам нужно, 
+// под именами std::true_tуре и std::false_type.
+template <typename T>
+void log_and_add_impl(T &&name, std::false_type)
+{
+	// not integer param passed
+
+	// do log
+	auto time = std::chrono::system_clock::now();
+	
+	names.emplace( std::forward<T>(name) );
+}
+
+void log_and_add_impl(int idx, std::true_type)
+{
+	// just chooses name from integer index
+	log_and_add_v2("name_from_index");
+}
+
+template <typename T>
+void log_and_add_v2(T &&uni_ref_param)
+{
+	// deligate execution to emplementation
+	log_and_add_impl( 
+		std::forward<T>(uni_ref_param), 
+
+		// NOTE: if lvalue int was passed to function ParamType 
+		// will be lvalue ref (int&) and will not be intergal type.
+		std::is_integral<
+			//typename std::remove_reference<T>::type
+			// C++14 style
+			std::remove_reference_t<T>
+		>()
+	);
+
+	// std::is_integral :
+	// Checks whether T is an integral type. Provides the member 
+	// constant value which is equal to true, if T is the type bool, 
+	// char, char8_t (since C++20), char16_t, char32_t, wchar_t, short, int, 
+	// long, long long, or any implementation-defined extended integer types, 
+	// including any signed, unsigned, and cv-qualified variants. Otherwise, 
+	// value is equal to false. 
+}
+
+
+void log_and_add_v2_test()
+{
+	char cval = 9;
+	short sval = 199;
+	double dval = 10.11;	// is not integral
+
+	string name("mik");
+
+	// Client code doesn't changed
+	log_and_add_v2(name);	// OK - uses uni ref version
+
+	log_and_add_v2(10);		// OK - uses integral version
+
+	log_and_add_v2(cval);	// OK
+	log_and_add_v2(sval);	// OK
+
+	// log_and_add_v2(dval);	// ERROR - not std::string Ctr takes double
+}
+
+
 int main()
 {
 	log_and_add_test();
 	
 	person_test();
+
+
+	log_and_add_v2_test();
 
 	return 0;       
 }
