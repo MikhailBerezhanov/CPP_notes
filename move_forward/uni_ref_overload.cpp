@@ -159,7 +159,7 @@ private:
 
 // Declaration of new version
 template <typename T>
-void log_and_add_v2(T &&);
+void log_and_add_fixed(T &&);
 
 // Worker function Implementation
 //
@@ -184,11 +184,11 @@ void log_and_add_impl(T &&name, std::false_type)
 void log_and_add_impl(int idx, std::true_type)
 {
 	// just chooses name from integer index
-	log_and_add_v2("name_from_index");
+	log_and_add_fixed("name_from_index");
 }
 
 template <typename T>
-void log_and_add_v2(T &&uni_ref_param)
+void log_and_add_fixed(T &&uni_ref_param)
 {
 	// deligate execution to emplementation
 	log_and_add_impl( 
@@ -213,7 +213,7 @@ void log_and_add_v2(T &&uni_ref_param)
 }
 
 
-void log_and_add_v2_test()
+void log_and_add_fixed_test()
 {
 	char cval = 9;
 	short sval = 199;
@@ -222,25 +222,154 @@ void log_and_add_v2_test()
 	string name("mik");
 
 	// Client code doesn't changed
-	log_and_add_v2(name);	// OK - uses uni ref version
+	log_and_add_fixed(name);	// OK - uses uni ref version
 
-	log_and_add_v2(10);		// OK - uses integral version
+	log_and_add_fixed(10);		// OK - uses integral version
 
-	log_and_add_v2(cval);	// OK
-	log_and_add_v2(sval);	// OK
+	log_and_add_fixed(cval);	// OK
+	log_and_add_fixed(sval);	// OK
 
-	// log_and_add_v2(dval);	// ERROR - not std::string Ctr takes double
+	// log_and_add_fixed(dval);	// ERROR - not std::string Ctr takes double
+}
+
+// This approach is based on not overloaded client API ( log_and_add_fixed() ).
+// Overload takes place only in implementation function. 
+//
+// So, problem for constructors with direct passing stays the same: 
+// compilers generate copy and move contructors that may overload direct passing 
+// contructor. Even if descriptors dispatching will be done for direct passing
+// constructor, generated constructors may be called as best candidates.
+// (see problems 2 and 3).
+//
+// 4. In such cases std::enable_if for constructor template can be used.
+
+class Person_fixed
+{
+public:
+
+	// "SFINAE" - технология позволяет работать std::еnаblе_if
+
+	// Шаблон с прямой передачей, включающийся по условиям
+	//   только если тип Т не является Person_fixed или порожденным от него (производным)
+	//   И Т не является целочисленным типом.
+	//
+	// - Для вызовов с аргументами типа Person_fixed шаблон будет отключаться и
+	//   использоваться будут сгенерированные компилятором копирующий или перемещающий
+	//   конструторы (const Person_fixed&, Person_fixed&&)
+	//
+	// - Для вызовов с целочисленными агрументами шаблон будет отключаться и 
+	//   использоваться будет его перегрузка принимающая int idx.
+	//
+
+	// Если разобраться, что означает, что шаблонный конструктор в классе Person должен
+	// быть включен только тогда, когда Т не является Person_fixed, то мы поймем, что, 
+	// глядя на Т, мы хотим игнорировать следующее.
+	// • Ссылки. С точки зрения определения, должен ли быть включен конструктор с уни­
+	//   версальной ссылкой, типы Person_fixed, Person_fixed& и Person_fixed&& должны 
+	//   рассматриваться как идентичные типу Person_fixed.
+	// • Модификаторы const и volatile. С той же точки зрения типы const Person_fixed,
+	//   volatile Person_fixed и const volatile Person должны рассматриваться как 
+	//   идентичные типу Person_fixed.
+	// 
+	// Для такого поведения существует std::decay. Тип std::decay<T>::type
+	// представляет собой то же самое, что и тип Т, но из него удалены все 
+	// ссылки и квалификаторы const и volatile.
+
+
+	// Применение std::еnаblе_if не влияет на реализацию функции. 
+	// Реализация остается той же. Добавляется допонительный параметр шаблона.
+	//
+	//	typename = typename std::enable_if< условие >::type 
+	//
+
+	template<
+		typename T,
+		typename = typename std::enable_if<  
+			!std::is_base_of< Person_fixed, 
+							  typename std::decay<T>::type 
+							>::value
+			&&
+			!std::is_integral< typename std::remove_reference<T>::type >::value 
+		>::type 
+	>
+	explicit Person_fixed(T &&param): name(std::forward<T>(param)){}
+
+	// Значение std::is_base_of< T1, T2 >::value истинно, если Т2 - класс, 
+	// производный от T1 . Пользовательские типы рассматриваются как производные от 
+	// самих себя, так что std::is_base_of< T, Т >::value истинно, если Т представляет 
+	// собой пользовательский тип. (Если Т является встроенным типом,
+	// std::is_base_of< T, T >::value ложно.)
+
+
+	explicit Person_fixed(int idx): name("name_from_index") {}
+
+	Person_fixed() = default;
+
+	//
+	// Generated copy and move constructors
+	//
+
+private:
+	string name;
+};
+
+
+class SpecialPerson_fixed final : public Person_fixed
+{
+public:
+
+	SpecialPerson_fixed(): Person_fixed() {}
+
+	// Теперь при передаче SpecialPerson_fixed для инициализации базовой части
+	// производного класса  НЕ будет вызываться конструктор с прямой передачей,
+	// а будут вызваны сгенерированные конструкторы копирования \ перемещения. 
+
+	SpecialPerson_fixed(const SpecialPerson_fixed &rhs): Person_fixed(rhs) {} // OK!
+
+	SpecialPerson_fixed(SpecialPerson_fixed &&rhs): Person_fixed(std::move(rhs)) {} // OK! 
+};
+
+void person_fixed_test()
+{
+	// Direct passing Ctr
+	Person_fixed pf("mik");	
+
+	string name = "bob";
+	Person_fixed pf2(name);
+	Person_fixed pf3(std::move(name));
+
+	// Direct passing Ctr disabled
+	Person_fixed pf_copy(pf3);				// Copy Ctr called
+	Person_fixed pf_move(std::move(pf));	// Move Ctr called
+
+	Person_fixed pf5(10);
+	short sval = 123;
+	char cval = 15;
+	Person_fixed pf6 = Person_fixed(sval);	// OK 
+	Person_fixed pf7(cval);
+
+	// Derived class test
+	SpecialPerson_fixed spf;
+	// Direct passing Person_fixed::Ctr disabled - copy and move Ctrs called
+	SpecialPerson_fixed spf_copy(spf);
+	SpecialPerson_fixed spf_move(std::move(spf));
 }
 
 
 int main()
 {
+	/// Problems demonstration
+
 	log_and_add_test();
 	
 	person_test();
 
 
-	log_and_add_v2_test();
+	// Solutions
+
+	log_and_add_fixed_test();
+
+	person_fixed_test();
 
 	return 0;       
 }

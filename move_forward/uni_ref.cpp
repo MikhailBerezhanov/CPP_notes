@@ -16,6 +16,11 @@ using namespace std;
 // 1. construction - T&&
 // 2. type deduction must take place
 
+// Main feature of universal referece is 
+// direct passing \ perfect forwarding - Прямая передача аргумента.
+// Internal functions or constructors get exactly input types of arguments.
+// preventing creation of temp objects or copying => more effective calls.
+
 class Person
 {
 public:

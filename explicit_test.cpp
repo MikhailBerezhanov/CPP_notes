@@ -28,7 +28,7 @@ public:
 		cout << "Person(const Person&)" << endl;
 	}
 
-	Person(Person &&rhs): name_(std::move(rhs.name_)), age_(std::move(rhs.age_))
+	Person(Person &&rhs) noexcept : name_(std::move(rhs.name_)), age_(std::move(rhs.age_))
 	{
 		cout << "Person(Person&&)" << endl;
 	}
