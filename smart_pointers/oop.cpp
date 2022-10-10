@@ -8,7 +8,7 @@ struct Base
 	Base(){cout << "Base()" << endl; }
 
 	// NOTE: without virtual ~Derived wouldn't be called
-	//virtual ~Base() { cout << "virtual ~Base()" << endl; }
+	/* virtual ~Base() { cout << "virtual ~Base()" << endl; } */
 	~Base() { cout << "~Base()" << endl; }
 };
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <cstdio>
 
 using namespace std;
 
@@ -7,7 +8,24 @@ using namespace std;
 
 int main()
 {
+	// Unique ptr features:
+	// - doesn't have Control block.
+	// - if no custom deleter provided has size == raw ptr (sizeof(void*))
+	// - custom deleter is type parameter.
+	// - has specialization for arrays (e.g. allocated with new[]).
+	//   uses delete[] as deleter in that case. 
+	// - supports operator[] (provides indexed access to the managed array)
+	unique_ptr<int[]> ints_array(new int[100]()); // new[]() <- value inializatoin
+	ints_array[50] = 43;
+	cout << "uptr size: " << sizeof(ints_array) << endl;
+	cout << ints_array[50] << endl;
 
+	// NOTE: decltype(function) deduce function signature ( i.e. int(FILE*) ). 
+	// To make deduction as function pointer - use '*' or '&function'. ( int(*)(FILE*) ) 
+	unique_ptr< FILE, decltype(fclose)* > uni_file(fopen("uni_file.txt", "w+"), fclose);
+
+	// Shared ptr custom deleter is not type but constructor parameter.
+	//
 	// Shared ptr uses Control block, that consists of:
 	// 		ref_counter_ptr
 	//		weak_ref_counter_ptr

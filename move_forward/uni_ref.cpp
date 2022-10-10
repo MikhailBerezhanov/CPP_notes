@@ -35,7 +35,7 @@ public:
 
 	// r-value ref but rhs is l-value! Use std::move for correct
 	// move semantic work.
-	Person(Person &&rhs): name(std::move(rhs.name)) {}
+	Person(Person &&rhs) noexcept : name(std::move(rhs.name)) {}
 
 	// Using universal reference
 	// Advantages of using  uni ref:
@@ -102,7 +102,7 @@ void uni_ref_test()
 	std::vector<int> vec;
 	std::string text;
 
-	// func1(vec); // ERROR: lvalue passed to rvalue ref
+	/* func1(vec); */ // ERROR: lvalue passed to rvalue ref
 	auto &&var1 = vec;				// universal ref
 	auto &&var2 = std::move(vec);	// universal ref
 

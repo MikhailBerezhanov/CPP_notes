@@ -37,7 +37,7 @@ public:
 	// in assigment operations wouldn't be tried to be converted to int to be
 	// used in Person(int) Ctr for temp object. Without explicit keyword it will.
 	//
-	// Person p1 = "mik";
+	/* Person p1 = "mik"; */
 
 	Person& operator= (const Person &rhs)
 	{
@@ -83,7 +83,8 @@ int main()
 
 	// ERROR - требуется два неяных преобразования:
 	// const char* -> std;:string -> Person
-	//Person p1 = "mik";  
+	/* Person p1 = "mik"; */  
+	
 	Person p1 = std::string("mik");
 
 	// Если конструктор помечен explicit то используется: 
@@ -94,7 +95,7 @@ int main()
 	// Без explicit применяется оптимизация инициализации 
 	// - вызов Person(int)
 
-	//Person p2 = 10;   `// ERROR конструктор explicit
+	/* Person p2 = 10; */  	// ERROR конструктор explicit
 	Person p2 = Person(10);	// OK and optimizatin works - just Person(int) called
 
 	double dval = 10.143;
@@ -109,13 +110,13 @@ int main()
 
 	p5.is_same(p4);		// OK
 
-	//p5.is_same("bob");	// ERROR трубется более одного неявного преобразования:
-						// const char* -> std::string -> Person 
+	/* p5.is_same("bob"); */// ERROR трубется более одного неявного преобразования:
+							// const char* -> std::string -> Person 
 	std::string name = "bob";
 	cout << p5.is_same(name) << endl;	// OK - одно неявное преобразование std::string -> Person
 
-	//p5.is_same(1043);	// ERROR - Одно неявное преобразование int -> Person , НО
-						// конструктора помечен как explicit и не допускает применения
-						// преобразований. 
+	/* p5.is_same(1043); */	// ERROR - Одно неявное преобразование int -> Person , НО
+							// конструктора помечен как explicit и не допускает применения
+							// преобразований. 
 	return 0;
 }

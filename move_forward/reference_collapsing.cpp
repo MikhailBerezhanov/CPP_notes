@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <string>
+#include <typeinfo>
 
 // using namespace std;
 
@@ -8,7 +9,7 @@
 // 1. template instantiation
 // 2. auto deduction
 // 3. typedef \ using =
-// 4.
+// 4. decltype
 //
 // Collapsing takes place when 'reference to reference' appears.
 // Possible ref_to_ref cases:
@@ -20,14 +21,32 @@
 // Rules of collapsing: if lvalue is a part of ref_to_ref , result is lvalue ref. 
 // Otherwise (rvalue ref to rvalue ref) - rvalue ref.
 
+
+
 // return value is r-value 
 std::string make_string()
 {
 	return "result";
 }
 
-std::string str;			// lvalue
+std::string str("text");	// lvalue
 std::string &str_ref = str;	// lvalue ref 
+
+void auto_deduction_demo()
+{
+	auto&& var1 = str;	// lvalue passed, template param - lvalue ref T&
+	/* string& && var1  ->  string &var1 */
+
+	var1 = "changed by var1";	// changing 'str' value
+
+	std::cout << "str: " << str << ", var1 type: " << typeid(var1).name() << std::endl;
+
+	auto&& var2 = make_string();	// rvalue passed, template param - T
+	/* string &&var2 */
+
+	std::cout << "var2 type: " << typeid(var2).name() << std::endl;
+}
+
 
 // C++11 
 namespace cpp11
@@ -121,13 +140,13 @@ namespace cpp11
 namespace cpp14
 {
 	template<typename T>
-	decltype(auto) my_move(T &&param)
+	constexpr decltype(auto) my_move(T &&param) noexcept
 	{
 		return static_cast< std::remove_reference_t<T>&& >(param);
 	}
 
 	template<typename T>
-	decltype(auto) my_forward(std::remove_reference_t<T> &param)
+	constexpr decltype(auto) my_forward(std::remove_reference_t<T> &param) noexcept
 	{
 		return static_cast< T&& >(param);
 	}
@@ -138,6 +157,8 @@ namespace cpp14
 int main()
 {
 	using namespace cpp11;
+
+	auto_deduction_demo();
 
 	my_move_tests();
 

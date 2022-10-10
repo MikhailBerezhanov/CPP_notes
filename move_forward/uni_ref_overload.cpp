@@ -47,9 +47,9 @@ void log_and_add_test()
 
 	log_and_add(15);		// OK - called int version
 
-	//log_and_add(name_idx);	// ERROR - called uni ref version as best candidate 
-							// T = short wins  VS  short_to_int conversion
-							// no std::string constructor accepts short
+	/* log_and_add(name_idx); */// ERROR - called uni ref version as best candidate 
+								// T = short wins  VS  short_to_int conversion
+								// no std::string constructor accepts short
 
 	// NOTE: uni ref is greedy when overloads take place. 
 	// T&& can represent any type and may be best candidate
@@ -89,9 +89,9 @@ void person_test()
 	// 		explicit Person(Person &str)
 	//
 
-	//Person copy_p(p); 	// ERROR - uni ref contructor called. 
-						// No std::string constructor accepts Person& .
-						// Copy constructor not called, because lvalue p is not const
+	/* Person copy_p(p); */ // ERROR - uni ref contructor called. 
+							// No std::string constructor accepts Person& . Copy 
+							// constructor not called, because lvalue p is not const.
 
 	const Person p2("Mik");
 
@@ -117,10 +117,10 @@ class SpecialPerson : public Person
 {
 public:
 	// Copy constructor
-	//SpecialPerson(const SpecialPerson &rhs): Person(rhs) {}
+	/* SpecialPerson(const SpecialPerson &rhs): Person(rhs) {} */
 
 	// Move constructor
-	//SpecialPerson(SpecialPerson &&rhs): Person(std::move(rhs)) {}
+	/* SpecialPerson(SpecialPerson &&rhs): Person(std::move(rhs)) {} */
 
 	// Will not be compiled bacause instead of calling copy \ move 
 	// constructors of base class, uni ref contructor would be called
@@ -229,7 +229,7 @@ void log_and_add_fixed_test()
 	log_and_add_fixed(cval);	// OK
 	log_and_add_fixed(sval);	// OK
 
-	// log_and_add_fixed(dval);	// ERROR - not std::string Ctr takes double
+	/* log_and_add_fixed(dval); */// ERROR - no std::string Ctr takes double
 }
 
 // This approach is based on not overloaded client API ( log_and_add_fixed() ).
@@ -358,7 +358,7 @@ void person_fixed_test()
 
 int main()
 {
-	/// Problems demonstration
+	// Problems demonstration
 
 	log_and_add_test();
 	
