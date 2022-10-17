@@ -77,6 +77,7 @@ static bool find_more_than_sz_symb_strings (std::vector<std::string>& words, std
 
 	std::for_each(wc, words.end(),[](std::string& s)->void {std::cout << s << " ";});
 	std::cout << std::endl;
+	return count != 0;
 }
 
 static void lambda_test()
@@ -92,7 +93,8 @@ static void lambda_test()
 			if(!local_var) return true;
 		}
 		else if(!local_var) return true;
-		else return false;
+		
+		return false;
 	};
 
 	// изменение лок. переменной приведет к изменению ее значения и в лямбда-функции, захватывающей ее по ссылке

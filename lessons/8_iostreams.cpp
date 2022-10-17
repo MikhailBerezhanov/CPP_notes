@@ -39,6 +39,7 @@ static int my_fread(const std::string& fname)
 	for(auto &it : vec) std::cout << it << std::endl;
 
 	file.close(); // Закрывается неявно когда удаляется объект fstream
+	return vec.size();
 }
 
 void chapter8 (void)

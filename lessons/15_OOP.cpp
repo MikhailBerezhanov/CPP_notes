@@ -109,8 +109,24 @@ public:
 	//или перемещение всего объекта, включая члены базового класса
 	Disc_quote(const Disc_quote& d): Quote(d), quantity(d.quantity), discount(d.discount) { }
 	Disc_quote(Disc_quote&& dr): Quote(std::move(dr)), quantity(std::move(dr.quantity)) , discount(std::move(dr.discount)) { }
-	Disc_quote& operator= (const Disc_quote& rhs){ Quote::operator=(rhs); quantity = rhs.quantity; discount = rhs.discount; }
-	Disc_quote& operator= (Disc_quote&& rhs){ Quote::operator=(std::move(rhs)); quantity = std::move(rhs.quantity); discount = std::move(rhs.discount); }
+	Disc_quote& operator= (const Disc_quote& rhs)
+	{ 
+		Quote::operator=(rhs); 
+		quantity = rhs.quantity; 
+		discount = rhs.discount;
+		return *this; 
+	}
+
+	Disc_quote& operator= (Disc_quote&& rhs)
+	{ 
+		if(this != &rhs){
+			Quote::operator=(std::move(rhs)); 
+			quantity = std::move(rhs.quantity); 
+			discount = std::move(rhs.discount);
+		}
+		
+		return *this; 
+	}
 
 	// унаследованная виртуальная -фия неявно является вирутальной. Спецификатор override показывает, что ф-ия с такой 
 	// сигнатурой должна быть в базовом классе и здесь она переопределяется. Сигнатуры должны точно совпадать за исключением 

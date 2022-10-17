@@ -11,7 +11,7 @@ BIN_NAME = tests.out
 # PATHS
 BIN_DIR = $(MAIN_DIR)/output
 OBJ_DIR = $(MAIN_DIR)/obj
-SRC_DIR = $(MAIN_DIR)/src
+SRC_DIR = $(MAIN_DIR)/lessons
 
 INC_PATHS = $(SRC_DIR)
 INCLUDE_PREFIX = -I

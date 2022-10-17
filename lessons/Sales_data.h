@@ -120,7 +120,7 @@ class Exercise
 	public:
 		typedef double Type;
 		Type setVal(Type);
-		Type initVal() { val = 1; };
+		Type initVal() { val = 1; return val; }
 	private:	
 		int val;
 };
