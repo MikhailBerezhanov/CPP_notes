@@ -126,10 +126,10 @@ namespace cpp11
 		// 4. passing r-value ref
 		// my_forward(std::move(str));
 /*
-	string&& my_forward(string &param)
-	{
-		return static_cast< string&& >(param);
-	}
+	string&& && my_forward(string &param)	->		string&& my_forward(string &param)
+	{												{
+		return static_cast< string&& && >(param);		return static_cast< string&& >(param);
+	}												}
 */
 	}
 

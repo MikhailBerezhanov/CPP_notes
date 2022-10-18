@@ -38,13 +38,17 @@ decltype(auto) func3(Container &&c, Idx i)
 }
 
 
+int generate_rvalue(){ return 10; }
+
 int main()
 {
 	int x = 10;			// decltype(x) - int
 	const int& rx = x;	// decltype(rx)- const int&
+	decltype(generate_rvalue());	// int&&
+	decltype(43);		// int&&
 
 	// NOTE: decltype( (x) ) - int& ! '()' - is expression !
-
+	decltype( (x) );	// int&
 
 	std::vector<int> vec{100, 1, -1};
 
