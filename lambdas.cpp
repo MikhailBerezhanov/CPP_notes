@@ -205,6 +205,8 @@ int main()
 
 	default_capture_is_dangerous();
 
+	use_initializing_capture();
+
 	perfect_forwarding_with_lambdas();
 	for(const auto &str : str_vec){
 		cout << str << endl;
