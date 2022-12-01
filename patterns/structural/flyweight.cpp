@@ -1,4 +1,9 @@
 #include <iostream>
+#include <memory>
+#include <string>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
 
 using namespace std;
 
@@ -32,6 +37,16 @@ class TreeType
 public:
 	TreeType(uint color, const std::string& texture): m_color(color), m_texture(texture) {}
 
+	// Position (x, y) is the contex
+	std::string Draw(int x, int y) const
+	{
+		stringstream ss;
+
+		ss << m_texture << "_" << m_color << "_at(" << x << "," << y << ")";
+
+		return ss.str();
+	}
+
 private:
 	uint m_color;
 	std::string m_texture;	
@@ -60,14 +75,69 @@ private:
 	std::unordered_map<std::string, shared_ptr<TreeType>> m_typesCache;
 };
 
-
-void ClientCode()
+// Контекстный объект, из которого мы выделили легковес
+// TreeType. В программе могут быть тысячи объектов Tree, так
+// как накладные расходы на их хранение совсем небольшие — в
+// памяти нужно держать всего три целых числа (две координаты и
+// ссылка).
+class Tree
 {
-	
-}
+public:
+	Tree(const std::shared_ptr<TreeType>& type, int x, int y):
+		m_type(type), m_x(x), m_y(y) {}
+
+	string Draw() const
+	{
+		return m_type->Draw(m_x, m_y);
+	}
+
+private:
+	std::shared_ptr<TreeType> m_type;	// shared state
+
+	// unique state
+	int m_x = 0;
+	int m_y = 0;
+};
+
+// Классы Tree и Forest являются клиентами Легковеса. 
+class Forest
+{
+public:
+
+	void AddTree(uint color, const std::string& texture, int x, int y)
+	{
+		const auto type = m_typesFactory.CreateTreeType(color, texture);
+
+		Tree tree(type, x, y);
+		m_trees.push_back(tree);
+	}
+
+	void Draw() const
+	{
+		for(const auto& tree : m_trees)
+		{
+			cout << tree.Draw() << endl;
+		}
+	}
+
+private:
+	TreeTypesFactory m_typesFactory;
+	vector<Tree> m_trees;
+};
 
 int main()
 {
+	Forest forest;
+
+	for(size_t i = 0; i < 10; ++i){
+		forest.AddTree(1, "bold", i * 2, i);
+	}
 	
+	for(size_t i = 0; i < 10; ++i){
+		forest.AddTree(255, "curve", i, i * 10);
+	}
+
+	forest.Draw();
+
 	return 0;
 }

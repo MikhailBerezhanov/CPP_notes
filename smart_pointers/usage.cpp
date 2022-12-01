@@ -6,6 +6,55 @@ using namespace std;
 
 
 
+struct A
+{
+	A() { cout << "A::Ctr" << endl; }
+	~A() { cout << "A::Dtr" << endl; }
+
+	void msg() { cout << "A::msg" << endl; }
+};
+	
+void pass_by_ref(const unique_ptr<A>& up)
+{
+	up->msg();
+
+	cout << "passed_by_ref exits" << endl;
+}
+
+void pass_by_value(unique_ptr<A> up)
+{
+	up->msg();
+
+	cout << "pass_by_value exits" << endl;
+}
+
+void unique_ptr_passing_test()
+{
+	cout << "----------------------------" << endl;
+
+	{
+		auto aptr = make_unique<A>();	// A::Ctr
+		
+		pass_by_ref(std::move(aptr));	// no movement take place
+
+		cout << "test 1 exiting" << endl;
+	} // A::Dtr
+	
+	cout << "----------------------------" << endl;
+
+	{
+		auto aptr = make_unique<A>();	// A::Ctr
+		
+		pass_by_value(std::move(aptr)); // ownership now inside function
+		// A::Dtr
+
+		cout << "test 2 exiting" << endl;
+	}
+
+	cout << "----------------------------" << endl;
+}
+
+
 int main()
 {
 	// Unique ptr features:
@@ -55,6 +104,8 @@ int main()
 	std::shared_ptr<double> sptr2(pi); 
 	// Control block for resource pi is created again. 
 	// This will cause double delete of pi !!
+
+	unique_ptr_passing_test();
 
 	return 0;
 }
