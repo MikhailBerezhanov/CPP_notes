@@ -52,6 +52,15 @@ void unique_ptr_passing_test()
 	}
 
 	cout << "----------------------------" << endl;
+
+	{		
+		pass_by_ref(make_unique<A>()); // A::Ctr (temp object created)
+		// A::Dtr
+
+		cout << "test 3 exiting" << endl;
+	}
+
+	cout << "----------------------------" << endl;
 }
 
 
