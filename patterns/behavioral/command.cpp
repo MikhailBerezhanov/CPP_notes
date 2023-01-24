@@ -32,12 +32,8 @@ using namespace std;
 //  — это хранение истории.
 
 
-struct Application;
-
-struct CopyCommand;
-struct CutCommand;
-struct PasteCommand;
-struct UndoCommand;
+struct Application;		// Invoker
+struct Editor;			// Receiver
 
 // Класс редактора содержит непосредственные операции над
 // текстом. Он отыгрывает роль получателя — команды делегируют
@@ -92,7 +88,36 @@ protected:
 	Application* const m_app = nullptr;
 };
 
+struct CopyCommand : public Command
+{
+	using Command::Command;
 
+	bool Execute() override;
+};
+
+struct CutCommand : public Command
+{
+	using Command::Command;
+
+	bool Execute() override;
+};
+
+struct PasteCommand : public Command
+{
+	using Command::Command;
+
+	bool Execute() override;
+};
+
+struct UndoCommand : public Command
+{
+	using Command::Command;
+
+	bool Execute() override;
+};
+
+
+// Команды-объекты можно хранить в контейнерах - история команд
 class CommandHistory
 {
 public:
@@ -117,8 +142,6 @@ public:
 private:
 	std::stack<std::shared_ptr<Command>> m_stack;
 };
-
-
 
 // Класс приложения настраивает объекты для совместной работы.
 // Он выступает в роли отправителя — создаёт команды, чтобы
@@ -151,70 +174,69 @@ struct Application
 	{
 		editor = std::make_shared<Editor>();
 
+		shared_ptr<Command> copyCmd = shared_ptr<Command>(new CopyCommand(this, editor));
+		shared_ptr<Command> cutCmd = std::make_shared<CutCommand>(this, editor);
+		shared_ptr<Command> pasteCmd = std::make_shared<PasteCommand>(this, editor);
+		shared_ptr<Command> undoCmd = std::make_shared<UndoCommand>(this, editor);
 
-		shared_ptr<Command> copyCmd = std::make_shared<CopyCommand>(this, editor);
+		auto copy = [this, &copyCmd](){ ExecuteCommand(copyCmd); };
+		auto cut = [this, &cutCmd](){ ExecuteCommand(cutCmd); };
+		auto paste = [this, &pasteCmd](){ ExecuteCommand(pasteCmd); };
+		auto undo = [this, &undoCmd](){ ExecuteCommand(undoCmd); };
 
-		// auto copyCmd = shared_ptr<Command>(new CopyCommand(this, editor));
-		// auto cutCmd = std::make_shared<CutCommand>(this, editor);
-		// auto pasteCmd = std::make_shared<PasteCommand>(this, editor);
-		// auto undoCmd = std::make_shared<UndoCommand>(this, editor);
+		// Use commands: 
 
-		// auto copy = [this, cmd = copyCmd](){
-		// 	ExecuteCommand(cmd);
-		// };
+		// button1.OnClick(copy);
+		// shortcuts.onKeyPress("Ctrl+C", copy);
+		//
+		// button2.OnClick(cut);
+		// shortcuts.onKeyPress("Ctrl+X", cut);
+		//
+		// button3.OnClick(paste);
+		// shortcuts.onKeyPress("Ctrl+V", paste);
+		//
+		// button4.OnClick(undo);
+		// shortcuts.onKeyPress("Ctrl+Z", undo);
 	}
 };
 
+// Из-за того, что для Apllication используется forward-declaration
+// мы можем использовать этот тип для указателя, но не можем использовать
+// его методы до объявления. Поэтому определяем методы команд 
+// после объявления класса Application (чтобы использовать m_app->...).
 
-struct CopyCommand : public Command
+bool CopyCommand::Execute() 
 {
-	using Command::Command;
+	m_app->clipboard = m_editor->GetSelection();
+	return false;	// No changes
+}
 
-	bool Execute() override
-	{
-		m_app->clipboard = m_editor->GetSelection();
-		return false;	// No changes
-	}
-};
-
-struct CutCommand : public Command
+bool CutCommand::Execute()
 {
-	using Command::Command;
+	SaveBackup();
+	m_app->clipboard = m_editor->GetSelection();
+	m_editor->DeleteSelection();
+	return true;	// Changes took place
+}
 
-	bool Execute() override
-	{
-		SaveBackup();
-		m_app->clipboard = m_editor->GetSelection();
-		m_editor->DeleteSelection();
-		return true;	// Changes took place
-	}
-};
-
-struct PasteCommand : public Command
+bool PasteCommand::Execute()
 {
-	using Command::Command;
+	SaveBackup();
+	m_editor->ReplaceSelection(m_app->clipboard);
+	return true;
+}
 
-	bool Execute() override
-	{
-		SaveBackup();
-		m_editor->ReplaceSelection(m_app->clipboard);
-		return true;
-	}
-};
-
-struct UndoCommand : public Command
+bool UndoCommand::Execute()
 {
-	using Command::Command;
-
-	bool Execute() override
-	{
-		m_app->Undo();
-		return false;
-	}
-};
+	m_app->Undo();
+	return false;
+}
 
 
 int main()
 {
+	Application app;
+	app.CreateUI();
+
 	return 0;
 }
