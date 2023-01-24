@@ -57,6 +57,8 @@ struct Editor
 
 // Абстрактная команда задаёт общий интерфейс для конкретных
 // классов команд и содержит базовое поведение отмены операции.
+//
+// Команды - прослойка между приложением и "бэкендом"
 class Command
 {
 public:
@@ -185,18 +187,19 @@ struct Application
 		auto undo = [this, &undoCmd](){ ExecuteCommand(undoCmd); };
 
 		// Use commands: 
-
-		// button1.OnClick(copy);
-		// shortcuts.onKeyPress("Ctrl+C", copy);
-		//
-		// button2.OnClick(cut);
-		// shortcuts.onKeyPress("Ctrl+X", cut);
-		//
-		// button3.OnClick(paste);
-		// shortcuts.onKeyPress("Ctrl+V", paste);
-		//
-		// button4.OnClick(undo);
-		// shortcuts.onKeyPress("Ctrl+Z", undo);
+		/*
+		button1.OnClick(copy);
+		shortcuts.onKeyPress("Ctrl+C", copy);
+		
+		button2.OnClick(cut);
+		shortcuts.onKeyPress("Ctrl+X", cut);
+		
+		button3.OnClick(paste);
+		shortcuts.onKeyPress("Ctrl+V", paste);
+		
+		button4.OnClick(undo);
+		shortcuts.onKeyPress("Ctrl+Z", undo);
+		*/
 	}
 };
 
