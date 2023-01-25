@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <vector>
 
 using namespace std;
 
@@ -52,62 +53,122 @@ struct ISocialNetwork
 	virtual ~ISocialNetwork() = default;
 
 	// Provide supported iterators types
-	IProfileIterator& CreateFriendsIterator() = 0;
-	IProfileIterator& CreateCoworkersIterator() = 0;
+	virtual std::unique_ptr<IProfileIterator> CreateFriendsIterator() = 0;
+	virtual std::unique_ptr<IProfileIterator> CreateCoworkersIterator() = 0;
 };
 
-
+// Concrete iteratos for custom container 
 class FriendsIterator : public IProfileIterator
 {
 public:
-	FriendsIterator(const std::vector<Profile>* profiles): m_profiles(profiles) {}
+	FriendsIterator(std::vector<Profile>& profiles): m_profiles(profiles) {}
 
+	// Each iterator implemets traversal methods (based on container specification)
 	virtual Profile& GetNext() override
 	{
-
+		return m_profiles[m_pos++];
 	}
 
 	virtual bool HasMore() override
 	{
-		
+		return m_pos < m_profiles.size();
 	}
 
 private:
+	std::vector<Profile>& m_profiles;
+	size_t m_pos = 0;
+};
 
-	std::vector<Profile>* m_profiles;
+class CoworkersIterator : public IProfileIterator
+{
+public:
+	CoworkersIterator(std::vector<Profile>& profiles): m_profiles(profiles) {}
+
+	virtual Profile& GetNext() override
+	{
+		Profile& res = m_profiles[m_pos];
+		m_pos += 2;
+
+		return res;
+	}
+
+	virtual bool HasMore() override
+	{
+		return m_pos < m_profiles.size();
+	}
+
+private:
+	std::vector<Profile>& m_profiles;
 	size_t m_pos = 0;
 };
 
 // Custom container
 class Facebook : public ISocialNetwork
 {
+public:
 
-	IProfileIterator& CreateFriendsIterator()
+	Facebook(std::initializer_list<Profile> ilist): m_profilesData(ilist) {}
+	Facebook(std::vector<Profile> vec): m_profilesData(std::move(vec)) {}
+
+	std::unique_ptr<IProfileIterator> CreateFriendsIterator() override
 	{
-
+		return std::make_unique<FriendsIterator>(m_profilesData);
 	}
 
-	IProfileIterator& CreateCoworkersIterator()
+	std::unique_ptr<IProfileIterator> CreateCoworkersIterator() override
 	{
-
+		return std::make_unique<CoworkersIterator>(m_profilesData);
 	}
+
+private:
+	std::vector<Profile> m_profilesData;
 };
 
 
 
-
-
-
-
-
-void ClientCode()
+class Spammer
 {
-	
+public:
+	void Send(const std::unique_ptr<IProfileIterator>& iter, const std::string& msg)
+	{
+		while (iter->HasMore())
+		{
+			Profile& profile = iter->GetNext();
+			SendMail(profile.email, msg);
+		}
+	}
+
+private:
+	void SendMail(const std::string& addr, const std::string& msg)
+	{
+		cout << "sending email to '" << addr << "'" << " : " << msg << endl;
+	}
+};
+
+// Client knows nothing about container and iterator impelemtation, 
+// but can traverse it
+void ClientCode(ISocialNetwork& network)
+{
+	Spammer spam;
+
+	cout << "---- Spamming to all friends -----" << endl;
+	spam.Send(network.CreateFriendsIterator(), "hello friend");
+
+	cout << "---- Spamming to all coworkers -----" << endl;
+	spam.Send(network.CreateCoworkersIterator(), "hello coworker");
 }
 
 int main()
 {
-	ClientCode();
+	std::vector<Profile> vec;
+	for (int i = 0; i < 52; ++i)
+	{
+		vec.push_back({.id = i, .email = std::to_string(i) + "@mail.abc"});
+	}
+
+	Facebook facebook(std::move(vec));
+
+	ClientCode(facebook);
 
 	return 0;
 }
