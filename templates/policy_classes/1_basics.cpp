@@ -98,10 +98,5 @@ int main()
     DualSmartPtr ciptr('a', 10);
     DualSmartPtr icptr(-10, 'b');
 
-
-    auto pmem = MallocCreator<double>::Create();
-    cout << "MallocCreator<double>::Create(): " << (pmem ? std::to_string(*pmem) : "nullptr") << endl;
-    delete pmem;
-
     return 0;
 }
