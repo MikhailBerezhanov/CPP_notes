@@ -4,3 +4,4 @@ output/
 val.txt
 build/
 CMakeFiles/
+.vscode/
